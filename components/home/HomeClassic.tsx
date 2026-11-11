@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import SiteChrome from "@/components/SiteChrome";
 import ListingsGrid from "@/components/ListingsGrid";
+import SeasonsHero from "@/components/home/SeasonsHero";
+import Splash from "@/components/home/Splash";
 import type { GalleryCard, Listing, SiteContent } from "@/content/site";
 
 /* ==========================================================================
@@ -20,27 +22,14 @@ export default function HomeClassic({
   const featuredListings = liveListings ?? content.featured?.listings ?? [];
   return (
     <SiteChrome content={content} animateIn>
-      {/* ============ HERO (fullscreen video or image) ============ */}
-      <section className="video-section">
-        <div className="video-wrapper">
-          {content.hero.video ? (
-            <video poster={content.hero.image} loop muted autoPlay playsInline>
-              {content.hero.video.webm && <source src={content.hero.video.webm} type="video/webm" />}
-              {content.hero.video.mp4 && <source src={content.hero.video.mp4} type="video/mp4" />}
-            </video>
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={content.hero.image} alt="" />
-          )}
-        </div>
-        <div className="overlay-component"></div>
-        <div className="middle-content-wrapper">
-          <div className="text-section">
-            <h5 className="pre-title">{content.hero.preTitle}</h5>
-            <h1 className="lp-h1">{content.hero.title}</h1>
-          </div>
-        </div>
-      </section>
+      {content.brand.decal && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img className="site-decal" src={content.brand.decal} alt="" aria-hidden="true" />
+      )}
+      {content.brand.logo && <Splash logo={content.brand.logo.dark} line={content.hero.preTitle} />}
+
+      {/* ============ HERO (four-season crossfade) ============ */}
+      <SeasonsHero hero={content.hero} />
 
       {/* ============ STICKY SEARCH BAR ============ */}
       <section className="search-bar-section" id="search-bar">

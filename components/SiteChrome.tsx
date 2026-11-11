@@ -32,6 +32,7 @@ export default function SiteChrome({
     "--taupe": content.theme.secondary,
     "--taupe-overlay": `rgba(${hexToRgb(content.theme.secondary)}, 0.4)`,
     "--cream": content.theme.background,
+    "--accent": content.theme.accent ?? content.theme.primary,
     background: content.theme.background,
   } as CSSProperties;
 

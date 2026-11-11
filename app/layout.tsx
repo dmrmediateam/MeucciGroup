@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(site.meta.siteUrl ?? "https://example.com"),
   title: site.meta.title,
   description: site.meta.description,
-  icons: { icon: "data:," },
+  icons: { icon: "/favicon.svg" },
 };
 
 /** Convert "#RRGGBB" to "r, g, b" for rgba() variants */
@@ -23,6 +23,7 @@ const themeVars = {
   "--taupe": site.theme.secondary,
   "--taupe-overlay": `rgba(${hexToRgb(site.theme.secondary)}, 0.4)`,
   "--cream": site.theme.background,
+  "--accent": site.theme.accent ?? site.theme.primary,
 } as React.CSSProperties;
 
 export default function RootLayout({
