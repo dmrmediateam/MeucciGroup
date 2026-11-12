@@ -13,6 +13,8 @@ const nextConfig = {
       { protocol: "https", hostname: "dx41nk9nsacii.cloudfront.net" },
       { protocol: "https", hostname: "**.idxbroker.com" },
       { protocol: "https", hostname: "cdn.agentimagehosting.com" },
+      // Demo placeholder listings (content/demoListings.ts); remove with them.
+      { protocol: "https", hostname: "images.unsplash.com" },
     ],
     formats: ["image/avif", "image/webp"],
     // Next 16 requires the quality values used anywhere in the app

@@ -420,7 +420,7 @@ export const site: SiteContent = {
         status: "For Sale",
         mls: "DEMO-0001",
         image: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=1200&q=80",
-        href: "/listings",
+        href: "/listing/warm-springs-road-ketchum-demo-0001",
       },
       {
         price: "$1,195,000",
@@ -432,7 +432,7 @@ export const site: SiteContent = {
         status: "For Sale",
         mls: "DEMO-0002",
         image: "https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1200&q=80",
-        href: "/listings",
+        href: "/listing/elkhorn-village-sun-valley-demo-0002",
       },
       {
         price: "$875,000",
@@ -444,7 +444,7 @@ export const site: SiteContent = {
         status: "Pending",
         mls: "DEMO-0003",
         image: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80",
-        href: "/listings",
+        href: "/listing/woodside-hailey-demo-0003",
       },
     ],
   },

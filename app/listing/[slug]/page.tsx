@@ -9,6 +9,7 @@ import { site } from "@/content/site";
 import { getListingDetail, getSoldListingDetail, parseListingSlug } from "@/lib/idx/listingDetail";
 import { searchListings } from "@/lib/idx/search";
 import { idxConfigured } from "@/lib/idx/config";
+import { demoSummaries, getDemoListing, isDemoListing } from "@/content/demoListings";
 
 export const revalidate = 900;
 
@@ -17,6 +18,9 @@ type Params = { params: Promise<{ slug: string }> };
 const siteUrl = site.meta.siteUrl ?? "https://example.com";
 
 async function loadListing(slug: string) {
+  // Placeholder listings render natively until IDX is connected.
+  const demo = getDemoListing(slug);
+  if (demo) return demo;
   if (!idxConfigured()) return null;
   const parsed = parseListingSlug(slug);
   if (!parsed) return null;
@@ -58,6 +62,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const listing = await loadListing(slug);
   if (!listing) return { title: `Listing – ${site.brand.name}`, robots: { index: false } };
+  const demo = isDemoListing(listing);
   const title = `${listing.address.full} | ${site.brand.name}`;
   const description = listing.description
     ? listing.description.slice(0, 155)
@@ -68,6 +73,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title,
     description,
     alternates: { canonical: url },
+    ...(demo ? { robots: { index: false, follow: true } } : {}),
     openGraph: { title, description, url, type: "website", ...(image ? { images: [{ url: image }] } : {}) },
     twitter: { card: "summary_large_image", title, description, ...(image ? { images: [image] } : {}) },
   };
@@ -139,6 +145,9 @@ export default async function ListingPage({ params }: Params) {
           subheading={site.listingGate.subheading}
         />
       )}
+      {isDemoListing(listing) ? (
+        <SimilarDemoListings excludeSlug={listing.slug} />
+      ) : (
       <Suspense>
         <SimilarListings
           city={listing.address.city}
@@ -147,7 +156,30 @@ export default async function ListingPage({ params }: Params) {
           excludeKey={`${listing.idxId}-${listing.listingId}`}
         />
       </Suspense>
+      )}
     </SiteChrome>
+  );
+}
+
+function SimilarDemoListings({ excludeSlug }: { excludeSlug: string }) {
+  const similar = demoSummaries(excludeSlug).slice(0, 3);
+  if (similar.length === 0) return null;
+  return (
+    <section className="solid-section">
+      <div className="featured-band lp-vertical-paddings">
+        <div className="lp-container">
+          <div className="featured-band__head">
+            <span className="featured-band__kicker">Around the Valley</span>
+            <h2 className="lp-h2">More Featured Properties</h2>
+          </div>
+          <div className="listings-grid">
+            {similar.map((listing) => (
+              <IdxListingCard listing={listing} key={listing.slug} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
