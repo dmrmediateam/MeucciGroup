@@ -114,6 +114,11 @@ export default function HomeClassic({
                 <h2 className="lp-h2">{content.featured.title}</h2>
               </div>
               <ListingsGrid listings={featuredListings.slice(0, 3)} />
+              {content.featured.cta && (
+                <div className="featured-band__foot reveal" data-delay="100">
+                  <a href={content.featured.cta.href} className="lp-btn lp-btn--outline">{content.featured.cta.label}</a>
+                </div>
+              )}
             </div>
           </div>
         </section>

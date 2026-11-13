@@ -173,7 +173,7 @@ export interface SiteContent {
    * in the deployment env; `listings` here is the manual fallback. Hidden when
    * neither yields listings.
    */
-  featured?: { title: string; subtitle?: string; listings?: Listing[] };
+  featured?: { title: string; subtitle?: string; listings?: Listing[]; cta?: { label: string; href: string } };
   /** Interior pages, rendered at /<slug> (or /<client>/<slug>) */
   pages: SubPage[];
   /**
@@ -410,6 +410,7 @@ export const site: SiteContent = {
   featured: {
     title: "Featured Properties",
     subtitle: "Around the Valley",
+    cta: { label: "Search All Homes", href: "/listings" },
     // DEMO listings: placeholders until IDX Broker is connected. Replace before launch.
     listings: [
       {
@@ -762,7 +763,7 @@ export const site: SiteContent = {
       { platform: "instagram", href: "https://www.instagram.com/meucci_group_sun_valley/" },
     ],
     // TODO: confirm the shop street address with Mike before launch
-    addressLines: ["Engel & Völkers Sun Valley", "Ketchum, Idaho 83340", PHONE],
+    addressLines: ["Engel & Völkers Sun Valley", "Ketchum, Idaho 83340"],
     newsletter: {
       heading: "Stay in the Loop",
       tagline: "New listings, market notes, and valley news. No spam, ever.",

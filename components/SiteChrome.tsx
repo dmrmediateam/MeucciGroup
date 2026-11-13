@@ -1,6 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
 import Script from "next/script";
-import NewsletterForm from "@/components/leads/NewsletterForm";
 import SiteEffects from "@/components/SiteEffects";
 import type { SiteContent } from "@/content/site";
 import { FAIR_HOUSING_PLEDGE, REALTOR_MARK_NOTICE, mlsDisclaimerFor } from "@/lib/legal";
@@ -87,6 +86,9 @@ export default function SiteChrome({
                 </li>
               ))}
             </ul>
+            <a href="/listings" className="nav-search" aria-label="Search homes">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4.2-4.2" /></svg>
+            </a>
             <button className="hamburger" id="hamburger" aria-label="Open menu"><span></span></button>
           </div>
         </div>
@@ -134,50 +136,49 @@ export default function SiteChrome({
       {/* ============ FOOTER ============ */}
       <footer>
         <div className="footer">
-          <div className="footer__layout container">
-            <div className="footer__col footer__col--brand">
-              {content.brand.brokerageLogo ? (
-                /* One lockup: agent name over the (larger) brokerage wordmark */
-                <div className="footer__lockup">
-                  <h2 className="footer__wordmark">{content.brand.name}</h2>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="footer__brokerage" src={content.brand.brokerageLogo.dark} alt={content.brand.tagline} />
-                </div>
+          {/* Logo, one row of links, contact. Name, brokerage and license are
+              already in the copyright and compliance lines below. */}
+          <div className="footer__top container">
+            <a href={content.brand.homeHref ?? "/"} className="footer__logo" aria-label="Home">
+              {content.brand.logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={content.brand.logo.dark} alt={content.brand.name} />
               ) : (
-                <>
-                  <h2 className="footer__wordmark">{content.brand.name}</h2>
-                  <div className="footer__agent">
-                    <p>{content.footer.agentName}<br /><strong>{content.footer.brokerage}</strong></p>
-                  </div>
-                </>
+                <span className="footer__wordmark">{content.brand.name}</span>
               )}
-            </div>
-            <div className="footer__col footer__col--nav">
-              <div className="footer__nav">
-                {content.footer.links.map((link) => (
-                  <a href={link.href} key={link.label}>{link.label}</a>
-                ))}
-              </div>
-              <ul className="socials">
-                {content.footer.socials.map((social) => (
-                  <li key={social.platform}>
-                    <a href={social.href} aria-label={social.platform}>
-                      <SocialIcon platform={social.platform} />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="footer__col footer__col--contact">
-              <h5>Address</h5>
-              <p>
-                {content.footer.addressLines.map((line, i) => (
-                  <span key={i}>{line}{i < content.footer.addressLines.length - 1 && <br />}</span>
-                ))}
-              </p>
-              <h5 className="footer__join">{content.footer.newsletter.heading}</h5>
-              <p className="footer__tagline">{content.footer.newsletter.tagline}</p>
-<NewsletterForm consent={content.footer.newsletter.consent} />
+              {content.brand.brokerageLogo && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img className="footer__brokerage" src={content.brand.brokerageLogo.dark} alt={content.brand.tagline} />
+              )}
+            </a>
+            <nav className="footer__nav" aria-label="Footer">
+              {content.footer.links.map((link) => (
+                <a href={link.href} key={link.label}>{link.label}</a>
+              ))}
+            </nav>
+            <div className="footer__contact">
+              {content.contact?.phone && (
+                <a href={`tel:${content.contact.phone.replace(/[^+\d]/g, "")}`}>{content.contact.phone}</a>
+              )}
+              {content.contact?.email && <a href={`mailto:${content.contact.email}`}>{content.contact.email}</a>}
+              <span className="footer__address">
+                {content.footer.addressLines
+                  .filter((line) => line !== content.contact?.phone)
+                  .map((line, i, all) => (
+                    <span key={i}>{line}{i < all.length - 1 && <br />}</span>
+                  ))}
+              </span>
+              {content.footer.socials.length > 0 && (
+                <ul className="socials">
+                  {content.footer.socials.map((social) => (
+                    <li key={social.platform}>
+                      <a href={social.href} aria-label={social.platform}>
+                        <SocialIcon platform={social.platform} />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
           <div className="footer__legal container">
