@@ -298,6 +298,8 @@ export interface SiteContent {
     avatar?: string;
     /** Alternate plain paragraphs and bolded lead-ins */
     blocks: { heading?: string; text: string }[];
+    /** Buttons under the homepage about statement; first is solid, rest outlined */
+    ctas?: { label: string; href: string }[];
   };
   cta: {
     title: string;
@@ -646,10 +648,11 @@ export const site: SiteContent = {
     priceBands: ["$500K to $750K", "$750K to $1M", "$1M to $2M", "$2M to $4M", "$4M+"],
     qualifiedBands: ["$750K to $1M", "$1M to $2M", "$2M to $4M", "$4M+"],
   },
+  // Fallback only: with IDX connected the homepage shows live MLS counts instead.
   stats: [
     { value: "4", label: "Towns, one valley: Sun Valley, Ketchum, Hailey, Bellevue" },
-    { value: "Same Day", label: "Every call and message returned, personally" },
-    { value: "E&V", label: "Engel & Völkers Sun Valley, Idaho license SP41471" },
+    { value: "1977", label: "Engel & Völkers founded in Hamburg" },
+    { value: "35+", label: "Countries in the Engel & Völkers network" },
   ],
   services: [
     {
@@ -711,12 +714,12 @@ export const site: SiteContent = {
     },
   ],
   about: {
-    title: "Meet Mike Meucci",
-    subtitle: "Engel & Völkers Sun Valley",
+    title: "Real Estate. Without the Runaround.",
+    subtitle: "Meet Mike Meucci · Engel & Völkers Sun Valley",
     image: "/photos/mike-portrait.jpg",
     blocks: [
       {
-        text: "Mike is a real estate advisor with Engel & Völkers Sun Valley, helping people buy and sell homes in Sun Valley, Ketchum, Hailey, and Bellevue. Clients describe him the same way his friends do: genuine, approachable, and easy to work with.",
+        text: "Mike Meucci sells homes across the Wood River Valley with Engel & Völkers Sun Valley. He is not a high-pressure agent and he does not pretend to be. He is the person you call when you want a straight answer about a neighborhood, a price, or whether now is the right time.",
       },
       {
         heading: "Local Knowledge. A Personal Approach.",
@@ -727,9 +730,12 @@ export const site: SiteContent = {
         text: "You will work with Mike directly, not a team of assistants. He returns calls the same day, tells you what he actually thinks, and handles the details so the process feels simple, even from a thousand miles away.",
       },
       {
-        heading: "A Good Place to Call Home. A Good Person to Call.",
-        text: "Whether you are buying your first place in the mountains, selling a home you have loved for years, or just wondering what is possible, Mike is glad to talk. Call or text any time at " + PHONE + ".",
+        text: "If you are weighing a move, a second home, or a sale, start with a conversation. No obligation, no pitch. Just good information from someone who knows the valley. Call or text any time at " + PHONE + ".",
       },
+    ],
+    ctas: [
+      { label: "Let's Connect", href: "/connect" },
+      { label: "More About Mike", href: "/about" },
     ],
   },
   cta: {

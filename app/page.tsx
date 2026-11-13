@@ -1,8 +1,13 @@
 import SitePage from "@/components/SitePage";
 import { site } from "@/content/site";
-import { getFeaturedListings, mergeFeatured } from "@/lib/idxbroker";
+import { getFeaturedForHome, getLiveStats } from "@/lib/homeData";
+
+export const revalidate = 900;
 
 export default async function Home() {
-  const liveListings = mergeFeatured(await getFeaturedListings(), site.featured?.listings);
-  return <SitePage content={site} liveListings={liveListings} />;
+  const [liveListings, liveStats] = await Promise.all([
+    getFeaturedForHome(),
+    getLiveStats(site.areas.length),
+  ]);
+  return <SitePage content={site} liveListings={liveListings} liveStats={liveStats} />;
 }

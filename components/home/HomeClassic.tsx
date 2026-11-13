@@ -4,6 +4,7 @@ import ListingsGrid from "@/components/ListingsGrid";
 import SeasonsHero from "@/components/home/SeasonsHero";
 import Splash from "@/components/home/Splash";
 import type { GalleryCard, Listing, SiteContent } from "@/content/site";
+import type { HomeStat } from "@/lib/homeData";
 
 /* ==========================================================================
    Home variant "classic": the original LP-derived design. Centered serif
@@ -14,12 +15,16 @@ import type { GalleryCard, Listing, SiteContent } from "@/content/site";
 export default function HomeClassic({
   content,
   liveListings,
+  liveStats,
 }: {
   content: SiteContent;
   /** Listings fetched from IDX Broker at request time; overrides config fallback */
   liveListings?: Listing[] | null;
+  /** Market counts from the MLS; overrides the config stats */
+  liveStats?: HomeStat[] | null;
 }) {
   const featuredListings = liveListings ?? content.featured?.listings ?? [];
+  const stats = liveStats && liveStats.length > 0 ? liveStats : content.stats;
   return (
     <SiteChrome content={content} animateIn>
       {content.brand.decal && (
@@ -50,28 +55,46 @@ export default function HomeClassic({
       {/* ============ SERVICES GALLERY ============ */}
       <GallerySection cards={content.services} columns={3} />
 
-      {/* ============ INTRO TEXT ============ */}
-      <section className="solid-section">
-        <div className="boxed-text lp-vertical-paddings">
+      {/* ============ ABOUT (consolidated intro): portrait, statement, CTAs ============ */}
+      <section className="solid-section" id="about">
+        <div className="about-flow lp-vertical-paddings">
           <div className="lp-container">
-            <h2 className="lp-h2 reveal">{content.intro.title}</h2>
-            <div className="boxed-text__description reveal" data-delay="100">
-              {content.intro.paragraphs.map((text, i) => (
-                <p key={i}>{text}</p>
-              ))}
-            </div>
-            <div className="boxed-text__btn reveal" data-delay="200">
-              <a href={content.intro.ctaHref} className="lp-btn lp-btn--outline">{content.intro.ctaLabel}</a>
+            <div className="about-flow__body reveal">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={content.about.image}
+                alt={content.about.title}
+                className={content.about.imageStyle === "photo" ? "about-flow__photo" : "about-flow__portrait"}
+              />
+              <h2 className="lp-h2">{content.about.title}</h2>
+              <div className="lp-text--subtitle">
+                <h5>{content.about.subtitle}</h5>
+                {content.about.blocks.map((block, i) => (
+                  <div key={i}>
+                    {block.heading && <p><strong>{block.heading}</strong></p>}
+                    <p>{block.text}</p>
+                  </div>
+                ))}
+              </div>
+              {content.about.ctas && content.about.ctas.length > 0 && (
+                <div className="about-flow__ctas">
+                  {content.about.ctas.map((cta, i) => (
+                    <a key={cta.href} href={cta.href} className={i === 0 ? "btn btn--primary-light" : "lp-btn lp-btn--outline"}>
+                      {cta.label}
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
       </section>
 
       {/* ============ STATS BAND ============ */}
-      {content.stats && (
+      {stats && (
         <section className="solid-section">
           <div className="stats-band lp-container reveal">
-            {content.stats.map((stat) => (
+            {stats.map((stat) => (
               <div className="stats-band__item" key={stat.label}>
                 <span className="stats-band__value">{stat.value}</span>
                 <span className="stats-band__label">{stat.label}</span>
@@ -98,32 +121,6 @@ export default function HomeClassic({
 
       {/* ============ AREAS GALLERY (overlay cards, hover reveal) ============ */}
       <GallerySection cards={content.areas} columns={2} variant="overlay" />
-
-      {/* ============ ABOUT — circular portrait, text flows around it ============ */}
-      <section className="solid-section">
-        <div className="about-flow lp-vertical-paddings">
-          <div className="lp-container">
-            <div className="about-flow__body reveal">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={content.about.image}
-                alt={content.about.title}
-                className={content.about.imageStyle === "photo" ? "about-flow__photo" : "about-flow__portrait"}
-              />
-              <h2 className="lp-h2">{content.about.title}</h2>
-              <div className="lp-text--subtitle">
-                <h5>{content.about.subtitle}</h5>
-                {content.about.blocks.map((block, i) => (
-                  <div key={i}>
-                    {block.heading && <p><strong>{block.heading}</strong></p>}
-                    <p>{block.text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ============ CTA (parallax) ============ */}
       <section
