@@ -5107,3 +5107,14 @@ html:not(.splash-on) .splash { display: none; }
 .about-flow__ctas { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
 .about-flow__ctas .lp-btn--outline { padding: 16px 34px; font-family: var(--body-font); font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
 @media (max-width: 700px) { .about-flow__ctas a { flex: 1 1 100%; text-align: center; } }
+
+/* Lining numerals everywhere. Cormorant Garamond defaults to old-style
+   figures, which read as lowercase and make prices and counts look odd. */
+html, body, button, input, select, textarea {
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "lnum" 1;
+}
+.stats-band__value, .listing-card__price, .lr-head__count, .ld__facts dt, .ld__glance dd, .idx-pagination button, .adv-results__count, .sv-hero__index, .ls-hero__title {
+  font-variant-numeric: lining-nums;
+  font-feature-settings: "lnum" 1;
+}
