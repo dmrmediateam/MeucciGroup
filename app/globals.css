@@ -5155,4 +5155,4 @@ html, body, button, input, select, textarea {
 .featured-band__foot .lp-btn--outline { padding: 16px 40px; font-family: var(--body-font); font-size: 13px; letter-spacing: 1.6px; text-transform: uppercase; }
 
 /* Side menu: logo in place of the text eyebrow */
-.sidemenu__logo { display: block; height: 44px; width: auto; max-width: 100%; margin-bottom: 34px; }
+.sidemenu__logo { display: block; align-self: flex-start; height: 36px; width: auto; max-width: 100%; object-fit: contain; margin-bottom: 34px; }
