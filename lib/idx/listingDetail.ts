@@ -15,9 +15,14 @@ const DETAIL_REVALIDATE_SECONDS = 900;
  * hyphen-separated tokens are the pair and everything after is the address.
  */
 export function parseListingSlug(slug: string): { idxId: string; listingId: string } | null {
-  const match = slug.match(/^([a-zA-Z0-9]+)-([a-zA-Z0-9]+)(?:-|$)/);
+  // Slugs are `<idxId>-<listingId>-<address...>`. Some boards (Sun Valley:
+  // "26-334638") put a dash inside the MLS number itself, so a short numeric
+  // second segment followed by a longer numeric one is one id, not two.
+  const match = slug.match(/^([a-zA-Z0-9]+)-([a-zA-Z0-9]+)(?:-([a-zA-Z0-9]+))?(?:-|$)/);
   if (!match) return null;
-  return { idxId: match[1], listingId: match[2] };
+  const [, idxId, second, third] = match;
+  const hyphenated = /^\d{1,4}$/.test(second) && third && /^\d{4,12}$/.test(third);
+  return { idxId, listingId: hyphenated ? `${second}-${third}` : second };
 }
 
 export async function getListingDetail(idxId: string, listingId: string): Promise<ListingDetail | null> {

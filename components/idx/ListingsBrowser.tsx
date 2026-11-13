@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import IdxListingCard from "@/components/idx/IdxListingCard";
 import LocationAutocomplete, { freeTextSelection } from "@/components/idx/LocationAutocomplete";
 import FilterSelect from "@/components/idx/FilterSelect";
+import ActiveFilterChips, { type Chip } from "@/components/idx/ActiveFilterChips";
 import { PROPERTY_TYPES } from "@/lib/idx/propertyTypes";
 import { filtersFromParams, paramsFromFilters } from "@/lib/idx/filterParams";
 import { trackSearch } from "@/lib/tracking/useTracking";
@@ -122,6 +123,30 @@ export default function ListingsBrowser({
   const first = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
   const last = Math.min(page * pageSize, totalCount);
 
+  const chips: Chip[] = [];
+  const place = filters.subdivision ?? filters.address ?? filters.city;
+  if (place)
+    chips.push({ key: "place", label: place, onRemove: () => applyFilters({ address: undefined, city: undefined, cityId: undefined, subdivision: undefined }) });
+  if (filters.minPrice) chips.push({ key: "min", label: `From ${priceLabel(filters.minPrice)}`, onRemove: () => applyFilters({ minPrice: undefined }) });
+  if (filters.maxPrice) chips.push({ key: "max", label: `Up to ${priceLabel(filters.maxPrice)}`, onRemove: () => applyFilters({ maxPrice: undefined }) });
+  if (filters.minBeds) chips.push({ key: "beds", label: `${filters.minBeds}+ Beds`, onRemove: () => applyFilters({ minBeds: undefined }) });
+  if (filters.minBaths) chips.push({ key: "baths", label: `${filters.minBaths}+ Baths`, onRemove: () => applyFilters({ minBaths: undefined }) });
+  if (filters.propertyTypes?.[0]) chips.push({ key: "type", label: filters.propertyTypes[0], onRemove: () => applyFilters({ propertyTypes: undefined }) });
+  if (filters.minSqFt) chips.push({ key: "sqft", label: `${filters.minSqFt.toLocaleString()}+ Sq. Ft.`, onRemove: () => applyFilters({ minSqFt: undefined }) });
+  if (filters.status && filters.status !== "active")
+    chips.push({ key: "status", label: filters.status === "sold" ? "Sold" : "Pending", onRemove: () => applyFilters({ status: "active" }) });
+  const clearAll = () => applyFilters({
+    address: undefined, city: undefined, cityId: undefined, subdivision: undefined,
+    minPrice: undefined, maxPrice: undefined, minBeds: undefined, minBaths: undefined,
+    propertyTypes: undefined, minSqFt: undefined, status: "active",
+  });
+
+  const headline = loading
+    ? "Searching the MLS"
+    : totalCount > 0
+      ? `${totalCount.toLocaleString()} ${totalCount === 1 ? "home" : "homes"}`
+      : "No homes match yet";
+
   return (
     <div className="idx-browser">
       <SearchFiltersBar filters={filters} onApply={applyFilters} propertyTypeOptions={propertyTypeOptions} />
@@ -141,18 +166,48 @@ export default function ListingsBrowser({
         </p>
       )}
 
-      <p className="idx-browser__count" aria-live="polite">
-        {/* Always announce the search while it runs: a cold city query takes a
-            few seconds, and leaving the previous count on screen reads as if
-            nothing happened. */}
-        {loading
-          ? "Searching the MLS…"
-          : totalCount > 0
-            ? `Showing ${first}–${last} of ${totalCount.toLocaleString()} homes`
-            : "No listings match these filters yet. Adjust the filters or reach out and we will search the full MLS for you."}
-      </p>
+      <div className="lr-head">
+        <div>
+          <span className="lr-head__eyebrow">
+            {place ? `Homes in ${place}` : "Across the Valley"}
+          </span>
+          <p className={`lr-head__count${loading ? " is-loading" : ""}`} aria-live="polite">
+            {headline}
+            {!loading && totalCount > 0 && (
+              <span className="lr-head__range"> · showing {first}–{last}</span>
+            )}
+          </p>
+        </div>
+        <div className="lr-head__sort">
+          <span className="lr-head__sort-label">Sort</span>
+          <FilterSelect
+            label="Sort order"
+            placeholder="Newest First"
+            value={filters.sort && filters.sort !== "newest" ? filters.sort : ""}
+            options={[
+              { value: "priceDesc", label: "Price: High to Low" },
+              { value: "priceAsc", label: "Price: Low to High" },
+              { value: "sqftDesc", label: "Largest First" },
+            ]}
+            onChange={(v) => applyFilters({ sort: (v || undefined) as SearchFilters["sort"] })}
+          />
+        </div>
+      </div>
 
-      <div className={`listings-grid${loading ? " listings-grid--loading" : ""}`}>
+      <ActiveFilterChips chips={chips} onClear={clearAll} />
+
+      {!loading && totalCount === 0 && !error && (
+        <div className="lr-empty">
+          <p>Nothing in the MLS matches those filters right now.</p>
+          <p className="lr-empty__sub">
+            Loosen a filter, or <a href="/connect">tell us what you want</a> and we will watch the market and the
+            off-market for you.
+          </p>
+          <button type="button" className="lr-chips__clear" onClick={clearAll}>Clear all filters</button>
+        </div>
+      )}
+
+      <div className={`listings-grid listings-grid--search${loading ? " listings-grid--loading" : ""}`}>
         {response?.listings.map((listing) => (
           <IdxListingCard listing={listing} key={`${listing.idxId}-${listing.listingId}`} />
         ))}
@@ -164,7 +219,7 @@ export default function ListingsBrowser({
           totalPages={response.totalPages}
           onPage={(p) => {
             applyFilters({ page: p }, false);
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            document.querySelector(".lr-head")?.scrollIntoView({ behavior: "smooth", block: "start" });
           }}
         />
       )}
@@ -199,102 +254,121 @@ function SearchFiltersBar({
   const applyLocation = (next: Partial<SearchFilters>) =>
     onApply({ address: undefined, city: undefined, cityId: undefined, subdivision: undefined, ...next });
 
+  const [more, setMore] = useState(Boolean(filters.minSqFt || (filters.status && filters.status !== "active")));
+  const submitLocation = () => {
+    const sel = freeTextSelection(location);
+    applyLocation({ city: sel.city, address: sel.address });
+  };
+  const field = (label: string, node: React.ReactNode, extra = "") => (
+    <div className={`sf__field${extra ? ` ${extra}` : ""}`}>
+      <span className="sf__label">{label}</span>
+      {node}
+    </div>
+  );
+
   return (
-    <div className="idx-filters">
-      <div className="idx-filters__location">
-        <LocationAutocomplete
-          value={location}
-          onChange={setLocation}
-          onSelect={(sel) =>
-            applyLocation({ cityId: sel.cityId, city: sel.city, subdivision: sel.subdivision, address: sel.address })
-          }
-          onSubmit={(raw) => {
-            const sel = freeTextSelection(raw);
-            applyLocation({ city: sel.city, address: sel.address });
-          }}
-        />
-        <button
-          type="button"
-          onClick={() => {
-            const sel = freeTextSelection(location);
-            applyLocation({ city: sel.city, address: sel.address });
-          }}
-          aria-label="Search"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+    <div className="sf">
+      <div className="sf__row">
+        {field(
+          "Location",
+          <div className="sf__loc">
+            <svg className="sf__loc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z" /><circle cx="12" cy="11" r="2.2" /></svg>
+            <LocationAutocomplete
+              value={location}
+              onChange={setLocation}
+              onSelect={(sel) =>
+                applyLocation({ cityId: sel.cityId, city: sel.city, subdivision: sel.subdivision, address: sel.address })
+              }
+              onSubmit={(raw) => {
+                const sel = freeTextSelection(raw);
+                applyLocation({ city: sel.city, address: sel.address });
+              }}
+            />
+          </div>,
+          "sf__field--loc",
+        )}
+        {field("Min Price", (
+          <FilterSelect
+            label="Minimum price"
+            placeholder="No Min"
+            value={filters.minPrice ? String(filters.minPrice) : ""}
+            options={[500000, 750000, 1000000, 1500000, 2000000, 3000000, 5000000, 10000000].map((v) => ({ value: String(v), label: priceLabel(v) }))}
+            onChange={(v) => onApply({ minPrice: v ? Number(v) : undefined })}
+          />
+        ))}
+        {field("Max Price", (
+          <FilterSelect
+            label="Maximum price"
+            placeholder="No Max"
+            value={filters.maxPrice ? String(filters.maxPrice) : ""}
+            options={[750000, 1000000, 1500000, 2000000, 3000000, 5000000, 10000000, 20000000].map((v) => ({ value: String(v), label: priceLabel(v) }))}
+            onChange={(v) => onApply({ maxPrice: v ? Number(v) : undefined })}
+          />
+        ))}
+        {field("Beds", (
+          <FilterSelect
+            label="Minimum bedrooms"
+            placeholder="Any"
+            value={filters.minBeds ? String(filters.minBeds) : ""}
+            options={[1, 2, 3, 4, 5, 6].map((v) => ({ value: String(v), label: `${v}+` }))}
+            onChange={(v) => onApply({ minBeds: v ? Number(v) : undefined })}
+          />
+        ))}
+        {field("Baths", (
+          <FilterSelect
+            label="Minimum bathrooms"
+            placeholder="Any"
+            value={filters.minBaths ? String(filters.minBaths) : ""}
+            options={[1, 2, 3, 4, 5].map((v) => ({ value: String(v), label: `${v}+` }))}
+            onChange={(v) => onApply({ minBaths: v ? Number(v) : undefined })}
+          />
+        ))}
+        {field("Type", (
+          <FilterSelect
+            label="Property type"
+            placeholder="Any"
+            value={filters.propertyTypes?.[0] ?? ""}
+            options={(propertyTypeOptions ?? [...PROPERTY_TYPES]).map((t) => ({ value: t, label: t }))}
+            onChange={(v) => onApply({ propertyTypes: v ? [v] : undefined })}
+          />
+        ))}
+        <button type="button" className="sf__go" onClick={submitLocation}>
+          <span>Search</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
         </button>
       </div>
 
-      <FilterSelect
-        label="Minimum price"
-        placeholder="Min Price"
-        value={filters.minPrice ? String(filters.minPrice) : ""}
-        options={[250000, 500000, 750000, 1000000, 2000000, 3000000, 5000000, 10000000].map((v) => ({
-          value: String(v),
-          label: priceLabel(v),
-        }))}
-        onChange={(v) => onApply({ minPrice: v ? Number(v) : undefined })}
-      />
-
-      <FilterSelect
-        label="Maximum price"
-        placeholder="Max Price"
-        value={filters.maxPrice ? String(filters.maxPrice) : ""}
-        options={[500000, 750000, 1000000, 2000000, 3000000, 5000000, 10000000, 20000000].map((v) => ({
-          value: String(v),
-          label: priceLabel(v),
-        }))}
-        onChange={(v) => onApply({ maxPrice: v ? Number(v) : undefined })}
-      />
-
-      <FilterSelect
-        label="Minimum bedrooms"
-        placeholder="Beds"
-        value={filters.minBeds ? String(filters.minBeds) : ""}
-        options={[1, 2, 3, 4, 5, 6].map((v) => ({ value: String(v), label: `${v}+ Beds` }))}
-        onChange={(v) => onApply({ minBeds: v ? Number(v) : undefined })}
-      />
-
-      <FilterSelect
-        label="Minimum bathrooms"
-        placeholder="Baths"
-        value={filters.minBaths ? String(filters.minBaths) : ""}
-        options={[1, 2, 3, 4, 5].map((v) => ({ value: String(v), label: `${v}+ Baths` }))}
-        onChange={(v) => onApply({ minBaths: v ? Number(v) : undefined })}
-      />
-
-      <FilterSelect
-        label="Property type"
-        placeholder="Property Type"
-        value={filters.propertyTypes?.[0] ?? ""}
-        options={(propertyTypeOptions ?? [...PROPERTY_TYPES]).map((t) => ({ value: t, label: t }))}
-        onChange={(v) => onApply({ propertyTypes: v ? [v] : undefined })}
-      />
-
-      <FilterSelect
-        label="Listing status"
-        placeholder="For Sale"
-        value={filters.status && filters.status !== "active" ? filters.status : ""}
-        options={[
-          { value: "active", label: "For Sale" },
-          { value: "pending", label: "Pending" },
-          { value: "sold", label: "Sold" },
-        ]}
-        onChange={(v) => onApply({ status: (v || "active") as SearchFilters["status"] })}
-      />
-
-      <FilterSelect
-        label="Sort order"
-        placeholder="Sort"
-        value={filters.sort ?? ""}
-        options={[
-          { value: "newest", label: "Newest First" },
-          { value: "priceDesc", label: "Price: High to Low" },
-          { value: "priceAsc", label: "Price: Low to High" },
-          { value: "sqftDesc", label: "Largest First" },
-        ]}
-        onChange={(v) => onApply({ sort: (v || undefined) as SearchFilters["sort"] })}
-      />
+      <div className="sf__foot">
+        <button type="button" className={`sf__more${more ? " is-open" : ""}`} aria-expanded={more} onClick={() => setMore((m) => !m)}>
+          {more ? "Fewer filters" : "More filters"}
+          <span className="sf__more-chevron" aria-hidden="true" />
+        </button>
+        {more && (
+          <div className="sf__refine">
+            {field("Min Sq. Ft.", (
+              <FilterSelect
+                label="Minimum square feet"
+                placeholder="Any"
+                value={filters.minSqFt ? String(filters.minSqFt) : ""}
+                options={[1500, 2000, 2500, 3000, 4000, 5000].map((v) => ({ value: String(v), label: `${v.toLocaleString()}+` }))}
+                onChange={(v) => onApply({ minSqFt: v ? Number(v) : undefined })}
+              />
+            ))}
+            {field("Status", (
+              <FilterSelect
+                label="Listing status"
+                placeholder="For Sale"
+                value={filters.status && filters.status !== "active" ? filters.status : ""}
+                options={[
+                  { value: "pending", label: "Pending" },
+                  { value: "sold", label: "Sold" },
+                ]}
+                onChange={(v) => onApply({ status: (v || "active") as SearchFilters["status"] })}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -320,7 +394,7 @@ function Pagination({
   }
   return (
     <nav className="idx-pagination" aria-label="Search results pages">
-      <button type="button" disabled={page <= 1} onClick={() => onPage(page - 1)}>Previous</button>
+      <button type="button" className="idx-pagination__arrow" disabled={page <= 1} onClick={() => onPage(page - 1)} aria-label="Previous page">&larr;</button>
       {pages.map((p, i) =>
         p === "..." ? (
           <span key={`gap-${i}`} className="idx-pagination__gap">&hellip;</span>
@@ -336,7 +410,7 @@ function Pagination({
           </button>
         ),
       )}
-      <button type="button" disabled={page >= totalPages} onClick={() => onPage(page + 1)}>Next</button>
+      <button type="button" className="idx-pagination__arrow" disabled={page >= totalPages} onClick={() => onPage(page + 1)} aria-label="Next page">&rarr;</button>
     </nav>
   );
 }

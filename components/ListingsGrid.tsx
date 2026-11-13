@@ -31,6 +31,7 @@ export default function ListingsGrid({ listings }: { listings: Listing[] }) {
                 .filter(Boolean)
                 .join(" · ")}
             </span>
+            <span className="listing-card__cta">View Property <span aria-hidden="true">→</span></span>
           </div>
         </a>
       ))}

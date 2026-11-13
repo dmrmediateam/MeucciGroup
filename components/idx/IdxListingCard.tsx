@@ -55,6 +55,7 @@ export default function IdxListingCard({ listing }: { listing: ListingSummary })
             .filter(Boolean)
             .join(" · ")}
         </span>
+        <span className="listing-card__cta">View Property <span aria-hidden="true">→</span></span>
       </div>
     </a>
   );

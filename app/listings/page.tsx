@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import SiteChrome from "@/components/SiteChrome";
+import ListingsShell from "@/components/idx/ListingsShell";
 import ListingsBrowser from "@/components/idx/ListingsBrowser";
 import ListingLeadGate from "@/components/idx/ListingLeadGate";
 import ListingsSearchPlaceholder from "@/components/ListingsSearchPlaceholder";
@@ -48,29 +48,20 @@ export default async function ListingsPage({ searchParams }: Params) {
     // Pre-IDX placeholder: native search UI over the agent's own portfolio
     const one = (k: string) => (typeof params[k] === "string" ? (params[k] as string) : "");
     return (
-      <SiteChrome content={site}>
-        <section className="idx-page-head">
-          <div className="lp-container">
-            <span className="idx-page-head__eyebrow">{site.landing?.serviceArea ?? "Property Search"}</span>
-            <h1>Find a home that feels like yours.</h1>
-            <p className="idx-page-head__sub">
-              Explore homes {site.footer.agentName} has represented, with full MLS search coming soon.
-            </p>
-          </div>
-        </section>
-        <section className="solid-section">
-          <div className="lp-container adv-search-wrap">
-            <ListingsSearchPlaceholder
-              listings={site.featured?.listings ?? []}
-              initial={{
-                city: one("city"), minPrice: one("minPrice"), maxPrice: one("maxPrice"),
-                propertyTypes: one("propertyTypes"), minBeds: one("minBeds"),
-                minBaths: one("minBaths"), minSqFt: one("minSqFt"), status: one("status"),
-              }}
-            />
-          </div>
-        </section>
-      </SiteChrome>
+      <ListingsShell
+        content={site}
+        title="Every Home in the Valley."
+        lead={`Explore homes ${site.footer.agentName} has represented, from Sun Valley to Bellevue. Full MLS search is on its way.`}
+      >
+        <ListingsSearchPlaceholder
+          listings={site.featured?.listings ?? []}
+          initial={{
+            city: one("city"), minPrice: one("minPrice"), maxPrice: one("maxPrice"),
+            propertyTypes: one("propertyTypes"), minBeds: one("minBeds"),
+            minBaths: one("minBaths"), minSqFt: one("minSqFt"), status: one("status"),
+          }}
+        />
+      </ListingsShell>
     );
   }
 
@@ -80,23 +71,14 @@ export default async function ListingsPage({ searchParams }: Params) {
   ]);
 
   return (
-    <SiteChrome content={site}>
-      <section className="idx-page-head">
-        <div className="lp-container">
-          <span className="idx-page-head__eyebrow">{site.landing?.serviceArea ?? "Property Search"}</span>
-          <h1>Find a home that feels like yours.</h1>
-          <p className="idx-page-head__sub">
-            Search every active listing{areaNames ? ` across ${areaNames} and beyond` : " in the market"}.
-          </p>
-        </div>
-      </section>
-      <section className="solid-section">
-        <div className="lp-container lp-vertical-paddings" style={{ paddingTop: 24 }}>
-          <Suspense>
-            <ListingsBrowser initialFilters={initialFilters} initialResponse={initialResponse} propertyTypeOptions={propertyTypeOptions} />
-          </Suspense>
-        </div>
-      </section>
+    <ListingsShell
+      content={site}
+      title="Every Home in the Valley."
+      lead={`Search every active listing${areaNames ? ` across ${areaNames} and beyond` : " in the market"}, updated straight from the MLS.`}
+    >
+      <Suspense>
+        <ListingsBrowser initialFilters={initialFilters} initialResponse={initialResponse} propertyTypeOptions={propertyTypeOptions} />
+      </Suspense>
       {/* Carried here so a heart on a result card has something to ask with.
           autoOpen is off: the view counter belongs to detail pages. */}
       {site.listingGate?.enabled && (
@@ -110,6 +92,6 @@ export default async function ListingsPage({ searchParams }: Params) {
           autoOpen={false}
         />
       )}
-    </SiteChrome>
+    </ListingsShell>
   );
 }

@@ -126,8 +126,8 @@ export default function ListingsSearchPlaceholder({
   }
 
   const field = (id: keyof PlaceholderFilters, label: string, options: Array<[string, string]>, any: string) => (
-    <div className="adv-search__field">
-      <span className="adv-search__label" id={`adv-${id}-label`}>{label}</span>
+    <div className={compact ? "adv-search__field" : "sf__field"}>
+      <span className={compact ? "adv-search__label" : "sf__label"} id={`adv-${id}-label`}>{label}</span>
       <FilterSelect
         label={label}
         placeholder={any}
@@ -139,21 +139,34 @@ export default function ListingsSearchPlaceholder({
   );
 
   const counts: Array<[string, string]> = ["1", "2", "3", "4", "5"].map((n) => [n, `${n}+`]);
+  const [more, setMore] = useState(Boolean(draft.minSqFt || draft.status));
 
-  return (
-    <>
-      <form className={`adv-search${compact ? " adv-search--compact" : ""}`} onSubmit={submit} role="search">
+  const active: Array<[keyof PlaceholderFilters, string]> = [];
+  if (applied.city) active.push(["city", applied.city]);
+  if (applied.minPrice) active.push(["minPrice", `From ${PRICES.find(([v]) => v === applied.minPrice)?.[1] ?? applied.minPrice}`]);
+  if (applied.maxPrice) active.push(["maxPrice", `Up to ${PRICES.find(([v]) => v === applied.maxPrice)?.[1] ?? applied.maxPrice}`]);
+  if (applied.propertyTypes) active.push(["propertyTypes", TYPES.find(([v]) => v === applied.propertyTypes)?.[1] ?? applied.propertyTypes]);
+  if (applied.minBeds) active.push(["minBeds", `${applied.minBeds}+ Beds`]);
+  if (applied.minBaths) active.push(["minBaths", `${applied.minBaths}+ Baths`]);
+  if (applied.minSqFt) active.push(["minSqFt", `${SQFT.find(([v]) => v === applied.minSqFt)?.[1] ?? applied.minSqFt} Sq. Ft.`]);
+  if (applied.status) active.push(["status", applied.status === "sold" ? "Sold" : "Active"]);
+  const remove = (key: keyof PlaceholderFilters) => {
+    const next = { ...applied, [key]: "" };
+    setDraft(next);
+    setApplied(next);
+    setPage(1);
+    const params = new URLSearchParams();
+    Object.entries(next).forEach(([k, v]) => v && params.set(k, v));
+    window.history.replaceState(null, "", `/listings${params.size ? `?${params}` : ""}`);
+  };
+
+  if (compact) {
+    return (
+      <form className="adv-search adv-search--compact" onSubmit={submit} role="search">
         <div className="adv-search__grid">
           <div className="adv-search__field adv-search__field--wide">
             <label htmlFor="adv-city">Location</label>
-            <input
-              id="adv-city"
-              type="text"
-              list="adv-towns"
-              placeholder="City, neighborhood, or address"
-              value={draft.city}
-              onChange={set("city")}
-            />
+            <input id="adv-city" type="text" list="adv-towns" placeholder="City, neighborhood, or address" value={draft.city} onChange={set("city")} />
             <datalist id="adv-towns">{towns.map((t) => <option key={t} value={t} />)}</datalist>
           </div>
           {field("minPrice", "Min Price", PRICES, "No Min")}
@@ -161,54 +174,109 @@ export default function ListingsSearchPlaceholder({
           {field("propertyTypes", "Property Type", TYPES, "Any Type")}
           {field("minBeds", "Bedrooms", counts, "Any")}
           {field("minBaths", "Bathrooms", counts, "Any")}
-          {!compact && field("minSqFt", "Min Sq Ft", SQFT, "Any Size")}
-          {!compact && field("status", "Status", [["active", "Active"], ["sold", "Sold"]], "Active & Sold")}
         </div>
         <div className="adv-search__foot">
-          {!compact && (
-            <button type="button" className="adv-search__reset" onClick={reset}>Clear filters</button>
-          )}
           <button type="submit" className="adv-search__submit">Search Listings</button>
         </div>
       </form>
+    );
+  }
 
-      {!compact && (
-        <div className="adv-results">
-          <div className="adv-results__head">
-            <div>
-              <span className="adv-results__eyebrow">{site.footer.agentName.split(" ")[0]}&apos;s Active &amp; Recently Sold Homes</span>
-              <p className="adv-results__count">
-                {results.length} {results.length === 1 ? "property" : "properties"}
-              </p>
+  return (
+    <>
+      <form className="sf" onSubmit={submit} role="search">
+        <div className="sf__row">
+          <div className="sf__field sf__field--loc">
+            <label className="sf__label" htmlFor="adv-city">Location</label>
+            <div className="sf__loc">
+              <svg className="sf__loc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z" /><circle cx="12" cy="11" r="2.2" /></svg>
+              <input
+                id="adv-city"
+                className="loc__input"
+                type="text"
+                list="adv-towns"
+                placeholder="City, neighborhood, or address"
+                value={draft.city}
+                onChange={set("city")}
+              />
+              <datalist id="adv-towns">{towns.map((t) => <option key={t} value={t} />)}</datalist>
             </div>
-            {results.length > 0 && (
-              <span className="adv-results__range">
-                Showing {(page - 1) * PAGE_SIZE + 1}–{(page - 1) * PAGE_SIZE + shown.length}
-              </span>
-            )}
           </div>
-          {shown.length > 0 ? (
-            <ListingsGrid listings={shown} />
-          ) : (
-            <div className="adv-results__empty">
-              <p>No homes in this portfolio match those filters yet.</p>
-              <button type="button" className="adv-search__reset" onClick={reset}>Clear filters</button>
-            </div>
-          )}
-          {pages > 1 && (
-            <div className="adv-results__pager">
-              <button type="button" disabled={page === 1} onClick={() => setPage((p) => p - 1)}>Previous</button>
-              <span>Page {page} of {pages}</span>
-              <button type="button" disabled={page === pages} onClick={() => setPage((p) => p + 1)}>Next</button>
-            </div>
-          )}
-          <p className="adv-results__note">
-            Full MLS search is coming soon. Looking for something
-            specific? <a href="/connect">Tell {site.footer.agentName.split(" ")[0]} what you want</a> to get matches,
-            including homes before they reach the portals.
-          </p>
+          {field("minPrice", "Min Price", PRICES, "No Min")}
+          {field("maxPrice", "Max Price", PRICES, "No Max")}
+          {field("minBeds", "Beds", counts, "Any")}
+          {field("minBaths", "Baths", counts, "Any")}
+          {field("propertyTypes", "Type", TYPES, "Any")}
+          <button type="submit" className="sf__go">
+            <span>Search</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+          </button>
         </div>
-      )}
+        <div className="sf__foot">
+          <button type="button" className={`sf__more${more ? " is-open" : ""}`} aria-expanded={more} onClick={() => setMore((m) => !m)}>
+            {more ? "Fewer filters" : "More filters"}
+            <span className="sf__more-chevron" aria-hidden="true" />
+          </button>
+          {more && (
+            <div className="sf__refine">
+              {field("minSqFt", "Min Sq. Ft.", SQFT, "Any")}
+              {field("status", "Status", [["active", "Active"], ["sold", "Sold"]], "Active & Sold")}
+            </div>
+          )}
+        </div>
+      </form>
+
+      <div className="adv-results">
+        <div className="lr-head">
+          <div>
+            <span className="lr-head__eyebrow">
+              {applied.city ? `Homes in ${applied.city}` : `${site.footer.agentName.split(" ")[0]}'s Featured Homes`}
+            </span>
+            <p className="lr-head__count">
+              {results.length} {results.length === 1 ? "home" : "homes"}
+              {results.length > 0 && (
+                <span className="lr-head__range"> · showing {(page - 1) * PAGE_SIZE + 1}–{(page - 1) * PAGE_SIZE + shown.length}</span>
+              )}
+            </p>
+          </div>
+          <span className="lr-head__soon">Full MLS search arriving soon</span>
+        </div>
+
+        {active.length > 0 && (
+          <div className="lr-chips" role="list" aria-label="Active filters">
+            {active.map(([key, label]) => (
+              <button type="button" role="listitem" key={key} className="lr-chip" onClick={() => remove(key)}>
+                <span>{label}</span>
+                <span className="lr-chip__x" aria-hidden="true">×</span>
+                <span className="visually-hidden">Remove</span>
+              </button>
+            ))}
+            <button type="button" className="lr-chips__clear" onClick={reset}>Clear all</button>
+          </div>
+        )}
+
+        {shown.length > 0 ? (
+          <ListingsGrid listings={shown} />
+        ) : (
+          <div className="lr-empty">
+            <p>No homes in this portfolio match those filters yet.</p>
+            <p className="lr-empty__sub">
+              Loosen a filter, or <a href="/connect">tell {site.footer.agentName.split(" ")[0]} what you want</a> and he
+              will watch the market for you.
+            </p>
+            <button type="button" className="lr-chips__clear" onClick={reset}>Clear all filters</button>
+          </div>
+        )}
+        {pages > 1 && (
+          <nav className="idx-pagination" aria-label="Results pages">
+            <button type="button" className="idx-pagination__arrow" disabled={page === 1} onClick={() => setPage((p) => p - 1)} aria-label="Previous page">&larr;</button>
+            {Array.from({ length: pages }, (_, i) => i + 1).map((p) => (
+              <button type="button" key={p} className={p === page ? "is-current" : undefined} aria-current={p === page ? "page" : undefined} onClick={() => setPage(p)}>{p}</button>
+            ))}
+            <button type="button" className="idx-pagination__arrow" disabled={page === pages} onClick={() => setPage((p) => p + 1)} aria-label="Next page">&rarr;</button>
+          </nav>
+        )}
+      </div>
     </>
   );
 }

@@ -13,6 +13,9 @@ const nextConfig = {
       { protocol: "https", hostname: "dx41nk9nsacii.cloudfront.net" },
       { protocol: "https", hostname: "**.idxbroker.com" },
       { protocol: "https", hostname: "cdn.agentimagehosting.com" },
+      // Sun Valley MLS photos (Spark Platform / FBS)
+      { protocol: "https", hostname: "cdn.photos.sparkplatform.com" },
+      { protocol: "https", hostname: "**.sparkplatform.com" },
       // Demo placeholder listings (content/demoListings.ts); remove with them.
       { protocol: "https", hostname: "images.unsplash.com" },
     ],

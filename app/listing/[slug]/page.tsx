@@ -47,7 +47,7 @@ function idxHostedListingUrl(slug: string): string | null {
   // Only hand over something shaped like a real MLS number (some boards use a
   // short letter prefix); junk stays a 404 on our own domain rather than
   // bouncing crawlers off to IDX.
-  if (!/^[A-Za-z]{0,3}\d{6,12}$/.test(parsed.listingId)) return null;
+  if (!/^[A-Za-z]{0,3}\d{1,4}-?\d{4,12}$/.test(parsed.listingId)) return null;
   /*
    * Sent without checking first. IDX answers 403 to requests from Vercel's
    * servers, so the page cannot be verified from here: probing returned 403
