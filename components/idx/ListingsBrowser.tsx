@@ -10,6 +10,7 @@ import { PROPERTY_TYPES } from "@/lib/idx/propertyTypes";
 import { filtersFromParams, paramsFromFilters } from "@/lib/idx/filterParams";
 import { trackSearch } from "@/lib/tracking/useTracking";
 import type { SearchFilters, SearchResponse } from "@/lib/idx/types";
+import { site } from "@/content/site";
 
 /* ==========================================================================
    Search results browser. The page SSRs the first response for SEO; this
@@ -275,6 +276,7 @@ function SearchFiltersBar({
             <svg className="sf__loc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z" /><circle cx="12" cy="11" r="2.2" /></svg>
             <LocationAutocomplete
               value={location}
+              defaultAreas={site.areas.map((area) => area.title)}
               onChange={setLocation}
               onSelect={(sel) =>
                 applyLocation({ cityId: sel.cityId, city: sel.city, subdivision: sel.subdivision, address: sel.address })

@@ -5142,14 +5142,13 @@ html, body, button, input, select, textarea {
 .footer__contact > a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .footer__address { color: #666; }
 .footer__contact .socials { margin-top: 14px; }
-.nav-search { display: inline-grid; place-items: center; width: 44px; height: 44px; margin-left: 10px; color: inherit; transition: opacity 0.2s; }
-.nav-search svg { width: 18px; height: 18px; }
-.nav-search:hover { opacity: 0.65; }
+.nav-search { display: inline-flex; align-items: center; gap: 8px; }
+.nav-search svg { width: 14px; height: 14px; flex: none; margin-top: -1px; }
+.navigation__item--search { margin-right: clamp(6px, 1vw, 18px); }
 @media (max-width: 960px) {
   .footer__top { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 28px; padding-bottom: 36px; }
   .footer__logo { align-items: center; }
   .footer__contact { align-items: center; text-align: center; }
-  .nav-search { margin-left: 0; }
 }
 .featured-band__foot { display: flex; justify-content: center; margin-top: 48px; }
 .featured-band__foot .lp-btn--outline { padding: 16px 40px; font-family: var(--body-font); font-size: 13px; letter-spacing: 1.6px; text-transform: uppercase; }

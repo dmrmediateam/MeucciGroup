@@ -80,15 +80,18 @@ export default function SiteChrome({
           </a>
           <div className="header__right">
             <ul className="navigation">
+              <li className="navigation__item navigation__item--search">
+                <a href="/listings" className="navigation__link nav-search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4.2-4.2" /></svg>
+                  <span>Search Listings</span>
+                </a>
+              </li>
               {content.nav.right.map((link) => (
                 <li className="navigation__item" key={link.label}>
                   <a href={link.href} className="navigation__link"><span>{link.label}</span></a>
                 </li>
               ))}
             </ul>
-            <a href="/listings" className="nav-search" aria-label="Search homes">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4.2-4.2" /></svg>
-            </a>
             <button className="hamburger" id="hamburger" aria-label="Open menu"><span></span></button>
           </div>
         </div>

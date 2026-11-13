@@ -56,6 +56,7 @@ export default function LocationAutocomplete({
   onSubmit,
   placeholder = "City, neighborhood, or address",
   id,
+  defaultAreas = [],
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -64,6 +65,8 @@ export default function LocationAutocomplete({
   onSubmit: (value: string) => void;
   placeholder?: string;
   id?: string;
+  /** Towns offered as soon as the field is focused, before anything is typed */
+  defaultAreas?: string[];
 }) {
   const reactId = useId();
   const inputId = id ?? `loc-${reactId}`;
@@ -92,7 +95,15 @@ export default function LocationAutocomplete({
 
   const suggestions = useMemo<Suggestion[]>(() => {
     const term = debounced.trim().toLowerCase();
-    if (!index || term.length < 2) return [];
+    if (term.length < 2) {
+      // Nothing typed yet: offer the market's towns so the visitor can tap one.
+      if (defaultAreas.length === 0) return [];
+      return defaultAreas.map<Suggestion>((name) => {
+        const match = index?.cities.find((c) => c.name.toLowerCase() === name.toLowerCase());
+        return { kind: "city", label: match?.state ? `${match.name}, ${match.state}` : name, cityId: match?.id };
+      });
+    }
+    if (!index) return [];
     const startsFirst = (a: string, b: string) => {
       const aStarts = a.toLowerCase().startsWith(term) ? 0 : 1;
       const bStarts = b.toLowerCase().startsWith(term) ? 0 : 1;
@@ -113,7 +124,7 @@ export default function LocationAutocomplete({
       .slice(0, MAX_PER_GROUP)
       .map<Suggestion>((n) => ({ kind: "neighborhood", label: n }));
     return [...cities, ...neighborhoods];
-  }, [index, debounced]);
+  }, [index, debounced, defaultAreas]);
 
   useEffect(() => { setActive(-1); }, [debounced]);
 
@@ -163,6 +174,7 @@ export default function LocationAutocomplete({
 
   const cityCount = suggestions.filter((s) => s.kind === "city").length;
   const showList = open && suggestions.length > 0;
+  const browsing = debounced.trim().length < 2;
 
   return (
     <div className="loc" ref={wrapRef}>
@@ -190,7 +202,7 @@ export default function LocationAutocomplete({
 
       {showList && (
         <ul className="loc__menu" id={listId} role="listbox" aria-label="Locations">
-          {cityCount > 0 && <li className="loc__group" role="presentation">Cities</li>}
+          {cityCount > 0 && <li className="loc__group" role="presentation">{browsing ? "Browse by Town" : "Cities"}</li>}
           {suggestions.map((s, i) =>
             s.kind === "neighborhood" && i === cityCount ? (
               <li key="nb-head-and-first" role="presentation" className="loc__group-wrap">
