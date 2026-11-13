@@ -116,7 +116,7 @@ export default function SeasonsHero({ hero }: { hero: SiteContent["hero"] }) {
         </div>
       )}
 
-      <a href="#search-bar" className="sv-hero__scroll" aria-label="Scroll down">
+      <a href="#after-hero" className="sv-hero__scroll" aria-label="Scroll down">
         <span>Scroll</span>
         <i aria-hidden="true" />
       </a>

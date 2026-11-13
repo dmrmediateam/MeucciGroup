@@ -105,7 +105,8 @@ export interface SiteContent {
      * Optional logo images. `light` shows over the transparent hero nav,
      * `dark` shows on the scrolled white nav and can be reused in the footer.
      */
-    logo?: { light: string; dark: string };
+    /** light = over photos/dark panels, dark = on white; menu = optional variant for the side menu */
+    logo?: { light: string; dark: string; menu?: string };
     /**
      * Brokerage logo shown under the agent name in the header and footer,
      * sized slightly wider than the name so the brokerage leads.
@@ -346,7 +347,7 @@ export const site: SiteContent = {
   brand: {
     name: "Mike Meucci",
     tagline: BROKERAGE,
-    logo: { light: "/brand/logo-light.png", dark: "/brand/logo-dark.png" },
+    logo: { light: "/brand/logo-light.png", dark: "/brand/logo-dark.png", menu: "/brand/logo-menu.png" },
     decal: "/brand/decal.svg",
   },
   meta: {

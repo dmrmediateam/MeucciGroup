@@ -36,23 +36,8 @@ export default function HomeClassic({
       {/* ============ HERO (four-season crossfade) ============ */}
       <SeasonsHero hero={content.hero} />
 
-      {/* ============ STICKY SEARCH BAR ============ */}
-      <section className="search-bar-section" id="search-bar">
-        <div className="search-bar">
-          <div className="search-input-container">
-            <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
-            <input type="text" placeholder={content.searchBar.placeholder} className="search-input" />
-          </div>
-          <a href={content.searchBar.ctaHref} className="contact-section">
-            <span className="link-label">{content.searchBar.ctaLabel}</span>
-            <span className="icon-style" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12h15" /><path d="M13 6l6 6-6 6" /></svg>
-            </span>
-          </a>
-        </div>
-      </section>
-
       {/* ============ SERVICES GALLERY ============ */}
+      <div id="after-hero" />
       <GallerySection cards={content.services} columns={3} />
 
       {/* ============ ABOUT (consolidated intro): portrait, statement, CTAs ============ */}

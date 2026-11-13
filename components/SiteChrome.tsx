@@ -104,7 +104,12 @@ export default function SiteChrome({
           <img className="sidemenu__decal" src={content.brand.decal} alt="" aria-hidden="true" />
         )}
         <button className="sidemenu__close" id="sidemenu-close" aria-label="Close menu">&times;</button>
-        <span className="sidemenu__eyebrow">{content.brand.tagline}</span>
+        {content.brand.logo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="sidemenu__logo" src={content.brand.logo.menu ?? content.brand.logo.light} alt={content.brand.name} />
+        ) : (
+          <span className="sidemenu__eyebrow">{content.brand.tagline}</span>
+        )}
         <ul className="sidemenu__nav">
           {content.nav.menu.map((link, i) => (
             <li key={link.label} style={{ transitionDelay: `${80 + i * 45}ms` }}>
