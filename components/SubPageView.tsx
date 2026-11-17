@@ -6,7 +6,8 @@ import RecentClosings from "@/components/RecentClosings";
 import PropertySearchExperience from "@/components/PropertySearchExperience";
 import ValuationWizard from "@/components/ValuationWizard";
 import AreaMap from "@/components/map/AreaMap";
-import IdxListingCard from "@/components/idx/IdxListingCard";
+import ServiceAreaMap from "@/components/map/ServiceAreaMap";
+import AreaPage from "@/components/area/AreaPage";
 import type { Listing, SiteContent, SubPage } from "@/content/site";
 import type { ListingSummary } from "@/lib/idx/types";
 import type { MapArea, MapListing } from "@/lib/mapData";
@@ -57,6 +58,7 @@ export default function SubPageView({
             <h1 className="lp-h1">{page.title}</h1>
           </div>
         </div>
+        {page.heroCredit && <span className="hero-credit">{page.heroCredit}</span>}
       </section>
       )}
 
@@ -72,8 +74,8 @@ export default function SubPageView({
         />
       )}
 
-      {/* ============ INTRO ============ */}
-      {page.intro && (
+      {/* ============ INTRO (area pages lay out their own) ============ */}
+      {page.intro && page.type !== "area" && (
         <section className="solid-section">
           <div className="boxed-text lp-vertical-paddings">
             <div className="lp-container">
@@ -97,7 +99,7 @@ export default function SubPageView({
       ) : page.type === "team" ? (
         <TeamBody content={content} page={page} />
       ) : page.type === "area" ? (
-        <AreaBody page={page} areaListings={live?.areaListings ?? []} idxEnabled={idxEnabled} />
+        <AreaPage content={content} page={page} areaListings={live?.areaListings ?? []} idxEnabled={idxEnabled} />
       ) : (
         <>
           {page.showMap && (
@@ -195,113 +197,14 @@ function PageCta({ page }: { page: SubPage }) {
   );
 }
 
-/** All-towns map: one pin per service area, plus live listing pins when the pool is warm */
+/** All-towns map: one pin per service area, plus live listing pins once zoomed in */
 function ServiceAreaMapSection({ areas, listings }: { areas: MapArea[]; listings: MapListing[] }) {
-  if (areas.length === 0) return null;
-  const center = areas[0].coords;
   return (
-    <section className="solid-section">
-      <div className="map-band lp-vertical-paddings">
-        <div className="lp-container">
-          <div className="featured-band__head reveal">
-            <span className="featured-band__kicker">Find Your Place</span>
-            <h2 className="lp-h2">The Towns on the Map</h2>
-          </div>
-          <div className="reveal" data-delay="100">
-            <AreaMap center={center} zoom={10} areas={areas} listings={listings} fit="areas" />
-          </div>
-          <p className="map-band__note">Tap a town for a snapshot and a link to its page. Price tags are live MLS listings.</p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/** Area page body: map of the town's active listings, the listing cards, then the editorial sections */
-function AreaBody({ page, areaListings, idxEnabled }: { page: SubPage; areaListings: ListingSummary[]; idxEnabled: boolean }) {
-  const area = page.area;
-  const mlsCity = area?.mlsCity ?? page.title;
-  const searchHref = `/listings?city=${encodeURIComponent(mlsCity)}`;
-  const pins: MapListing[] = areaListings.flatMap((l) =>
-    l.lat !== undefined && l.lng !== undefined
-      ? [{
-          lat: l.lat,
-          lng: l.lng,
-          price: l.price,
-          address: l.address.street || l.address.full,
-          city: l.address.city,
-          href: l.detailUrl,
-          photo: l.primaryPhoto?.url,
-          beds: l.beds || undefined,
-          baths: l.baths || undefined,
-        }]
-      : [],
-  );
-  const shown = areaListings.slice(0, 9);
-  const count = areaListings.length;
-
-  return (
-    <>
-      {area && (
-        <section className="solid-section">
-          <div className="map-band lp-vertical-paddings">
-            <div className="lp-container">
-              <div className="featured-band__head reveal">
-                <span className="featured-band__kicker">On the Map</span>
-                <h2 className="lp-h2">{count > 0 ? `Homes for Sale in ${page.title}` : `Around ${page.title}`}</h2>
-              </div>
-              <div className="reveal" data-delay="100">
-                <AreaMap
-                  center={area.center}
-                  zoom={area.zoom ?? 13}
-                  listings={pins}
-                  fit={pins.length > 0 ? "listings" : "none"}
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      <section className="solid-section">
-        <div className="featured-band lp-vertical-paddings area-listings">
-          <div className="lp-container">
-            <div className="area-listings__head reveal">
-              <div>
-                <span className="featured-band__kicker">Live from the MLS</span>
-                <h2 className="lp-h2">
-                  {count > 0
-                    ? `${count} ${count === 1 ? "Home" : "Homes"} for Sale in ${page.title}`
-                    : `Homes for Sale in ${page.title}`}
-                </h2>
-              </div>
-              <a className="area-listings__more" href={searchHref}>
-                {count > shown.length ? `See All ${count} in ${page.title}` : `Search ${page.title}`}
-              </a>
-            </div>
-            {shown.length > 0 ? (
-              <div className="listings-grid">
-                {shown.map((listing) => (
-                  <IdxListingCard listing={listing} key={`${listing.idxId}-${listing.listingId}`} />
-                ))}
-              </div>
-            ) : (
-              <div className="area-listings__empty reveal">
-                <p>
-                  {idxEnabled
-                    ? `Nothing active in ${page.title} at the moment. Inventory here moves quietly, so ask Mike what is coming.`
-                    : `Live ${page.title} listings appear here once the MLS feed is connected.`}
-                </p>
-                <a className="lp-btn lp-btn--outline" href="/listings">Search the Whole Market</a>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      <EditorialSections page={page} />
-      <PageCta page={page} />
-    </>
+    <ServiceAreaMap
+      areas={areas}
+      listings={listings}
+      note={listings.length > 0 ? "Zoom into a town to see live MLS listings as price tags." : undefined}
+    />
   );
 }
 

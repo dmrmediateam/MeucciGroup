@@ -17,6 +17,9 @@ const TILE_URL = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Top
 const TILE_ATTRIBUTION = "Tiles &copy; Esri &mdash; Esri, HERE, Garmin, USGS, NGA, OpenStreetMap contributors";
 /** On the all-towns map, listing price tags only appear once zoomed in past this */
 const LISTING_PINS_MIN_ZOOM = 11;
+/** A crowded area map shows dots instead of price tags until zoomed past this */
+const DENSE_LISTING_COUNT = 20;
+const DENSE_LABEL_MIN_ZOOM = 14;
 
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string);
@@ -88,11 +91,14 @@ export interface LeafletMapProps {
   listings?: MapListing[];
   /** Zoom the map to contain these pins (after the initial center/zoom) */
   fit?: "areas" | "listings" | "all" | "none";
+  /** Title of the area whose popup should be open (hover sync with a list) */
+  focus?: string;
   className?: string;
 }
 
-export default function LeafletMap({ center, zoom, areas = [], listings = [], fit = "none", className }: LeafletMapProps) {
+export default function LeafletMap({ center, zoom, areas = [], listings = [], fit = "none", focus, className }: LeafletMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const areaMarkers = useRef(new Map<string, L.Marker>());
 
   useEffect(() => {
     const container = containerRef.current;
@@ -115,9 +121,10 @@ export default function LeafletMap({ center, zoom, areas = [], listings = [], fi
     areas.forEach((area) => {
       // Put the label on the side away from the nearest other town so close
       // neighbours (Sun Valley/Ketchum, Hailey/Bellevue) never overlap.
-      L.marker([area.coords.lat, area.coords.lng], { icon: areaIcon(area.title, labelAbove(area, areas)), zIndexOffset: 1000, keyboard: true, title: area.title })
-        .bindPopup(areaPopup(area), { className: "map-popup-wrap", maxWidth: 260 })
+      const marker = L.marker([area.coords.lat, area.coords.lng], { icon: areaIcon(area.title, labelAbove(area, areas)), zIndexOffset: 1000, keyboard: true, title: area.title })
+        .bindPopup(areaPopup(area), { className: "map-popup-wrap", maxWidth: 260, autoPan: false })
         .addTo(areaLayer);
+      areaMarkers.current.set(area.title, marker);
     });
     for (const listing of listings) {
       L.marker([listing.lat, listing.lng], { icon: listingIcon(listing.price), title: listing.address })
@@ -148,6 +155,16 @@ export default function LeafletMap({ center, zoom, areas = [], listings = [], fi
       syncListings();
     }
 
+    // Many listings in one town: price tags would overlap into a black
+    // blob, so show dots until the visitor zooms in to a neighbourhood.
+    if (listings.length > DENSE_LISTING_COUNT) {
+      const syncDensity = () => {
+        container.classList.toggle("area-map__canvas--dense", map.getZoom() < DENSE_LABEL_MIN_ZOOM);
+      };
+      map.on("zoomend", syncDensity);
+      syncDensity();
+    }
+
     // Containers inside reveal/animated sections can be measured at 0px once
     const resize = () => map.invalidateSize();
     const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(resize) : null;
@@ -155,9 +172,15 @@ export default function LeafletMap({ center, zoom, areas = [], listings = [], fi
 
     return () => {
       observer?.disconnect();
+      areaMarkers.current.clear();
       map.remove();
     };
   }, [center.lat, center.lng, zoom, areas, listings, fit]);
+
+  useEffect(() => {
+    if (!focus) return;
+    areaMarkers.current.get(focus)?.openPopup();
+  }, [focus]);
 
   return <div ref={containerRef} className={`area-map__canvas${className ? ` ${className}` : ""}`} role="region" aria-label="Map" />;
 }

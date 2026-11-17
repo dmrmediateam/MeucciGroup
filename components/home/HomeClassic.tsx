@@ -6,7 +6,7 @@ import Splash from "@/components/home/Splash";
 import type { GalleryCard, Listing, SiteContent } from "@/content/site";
 import type { HomeStat } from "@/lib/homeData";
 import type { MapArea } from "@/lib/mapData";
-import AreaMap from "@/components/map/AreaMap";
+import ServiceAreaMap from "@/components/map/ServiceAreaMap";
 
 /* ==========================================================================
    Home variant "classic": the original LP-derived design. Centered serif
@@ -123,22 +123,7 @@ export default function HomeClassic({
       <GallerySection cards={content.areas} columns={2} variant="overlay" />
 
       {/* ============ SERVICE-AREA MAP (one pin per town, live counts) ============ */}
-      {pins.length > 0 && (
-        <section className="solid-section">
-          <div className="map-band lp-vertical-paddings">
-            <div className="lp-container">
-              <div className="featured-band__head reveal">
-                <span className="featured-band__kicker">Find Your Place</span>
-                <h2 className="lp-h2">The Towns on the Map</h2>
-              </div>
-              <div className="reveal" data-delay="100">
-                <AreaMap center={pins[0].coords} zoom={10} areas={pins} fit="areas" />
-              </div>
-              <p className="map-band__note">Tap a town for a snapshot and a link to its page.</p>
-            </div>
-          </div>
-        </section>
-      )}
+      <ServiceAreaMap areas={pins} />
 
       {/* ============ CTA (parallax) ============ */}
       <section

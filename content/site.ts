@@ -84,6 +84,14 @@ export interface SubPage {
   area?: { mlsCity: string; center: { lat: number; lng: number }; zoom?: number };
   /** Add the service-area map (every `areas` pin + live listings) to a standard page */
   showMap?: boolean;
+  /** Area pages: one large serif sentence opening the editorial intro (defaults to intro[0]) */
+  lede?: string;
+  /** Area pages: quick facts shown under the hero, after the live MLS numbers */
+  facts?: { label: string; value: string }[];
+  /** Area pages: up to three photos in a mosaic; credit is required for CC-licensed images */
+  gallery?: { src: string; alt?: string; caption?: string; credit?: string }[];
+  /** Small photo credit over the hero (CC-licensed images) */
+  heroCredit?: string;
 }
 
 export interface SiteContent {
@@ -572,7 +580,7 @@ export const site: SiteContent = {
         {
           heading: "Stanley and the Sawtooth Valley",
           text: "An hour north of Ketchum over Galena Summit, Stanley sits where the Salmon River begins and the Sawtooths rise straight out of the valley floor. Redfish Lake, hot springs, and the wilderness boundary are minutes away. Homes and acreage come up rarely, and Mike keeps an eye on every one of them.",
-          image: "/photos/wildflowers.jpg",
+          image: "/photos/stanley-redfish-canyon.jpg",
         },
         {
           heading: "The life outside",
@@ -589,6 +597,16 @@ export const site: SiteContent = {
       preTitle: "Homes in Sun Valley, Idaho",
       heroImage: "/photos/baldy-torchlight.jpg",
       area: { mlsCity: "Sun Valley", center: { lat: 43.6971, lng: -114.3517 }, zoom: 13 },
+      facts: [
+        { label: "Elevation", value: "5,920 ft" },
+        { label: "To Ketchum", value: "5 min" },
+        { label: "Known for", value: "The Lodge, Dollar, Elkhorn" },
+      ],
+      gallery: [
+        { src: "/photos/baldy-torchlight.jpg", alt: "Torchlight parade on Bald Mountain", caption: "Baldy on a winter night" },
+        { src: "/photos/ev-balloons.jpg", alt: "Hot air balloons over Sun Valley" },
+        { src: "/photos/season-winter.jpg", alt: "First snow on the Boulder Mountains" },
+      ],
       intro: [
         "The original American ski resort and still the heart of winter here. Sun Valley is the Lodge and the Village, Elkhorn, and the quiet residential streets near the golf courses, the pool, and the Dollar Mountain lifts.",
         "Condos and townhomes in the Village and Elkhorn sit a short walk from the ice rink and the trails. The single-family streets toward the Trail Creek side are some of the most settled addresses in the valley.",
@@ -614,6 +632,16 @@ export const site: SiteContent = {
       preTitle: "Homes in Ketchum, Idaho",
       heroImage: "/photos/ketchum-evening.jpg",
       area: { mlsCity: "Ketchum", center: { lat: 43.6807, lng: -114.3637 }, zoom: 13 },
+      facts: [
+        { label: "Elevation", value: "5,853 ft" },
+        { label: "To the lifts", value: "Walkable" },
+        { label: "Known for", value: "Baldy, dining, galleries" },
+      ],
+      gallery: [
+        { src: "/photos/ketchum-evening.jpg", alt: "Downtown Ketchum at dusk", caption: "Downtown at dusk" },
+        { src: "/photos/season-summer.jpg", alt: "Bald Mountain above Ketchum in summer" },
+        { src: "/photos/ketchum-town-event.jpg", alt: "A summer evening event in Ketchum" },
+      ],
       intro: [
         "The walkable town at the base of Bald Mountain, with restaurants, galleries, and shops a few steps from the Warm Springs and River Run lifts. Ketchum is where the valley goes out to dinner.",
         "Neighborhoods range from downtown condos to homes tucked into the hillsides along Warm Springs Creek and the Big Wood River, with the Engel & Völkers shop right on the main street.",
@@ -639,6 +667,16 @@ export const site: SiteContent = {
       preTitle: "Homes in Hailey, Idaho",
       heroImage: "/photos/hailey-aerial.jpg",
       area: { mlsCity: "Hailey", center: { lat: 43.5196, lng: -114.3153 }, zoom: 13 },
+      facts: [
+        { label: "Elevation", value: "5,318 ft" },
+        { label: "To Ketchum", value: "15 min" },
+        { label: "Known for", value: "Schools, airport, Main Street" },
+      ],
+      gallery: [
+        { src: "/photos/hailey-aerial.jpg", alt: "Hailey from above in fall", caption: "Hailey in October" },
+        { src: "/photos/hailey-hotel.jpg", alt: "The Hailey Hotel on Main Street", caption: "Main Street", credit: "Photo: Acroterion, CC BY-SA 4.0" },
+        { src: "/photos/season-fall.jpg", alt: "The Big Wood River in fall" },
+      ],
       intro: [
         "Twelve miles south of Ketchum, Hailey is where much of the valley actually lives: the schools, the airport, Main Street, and friendly year-round neighborhoods. It is where families settle in for good.",
       ],
@@ -663,6 +701,16 @@ export const site: SiteContent = {
       preTitle: "Homes in Bellevue, Idaho",
       heroImage: "/photos/season-spring.jpg",
       area: { mlsCity: "Bellevue", center: { lat: 43.4635, lng: -114.2606 }, zoom: 13 },
+      facts: [
+        { label: "Elevation", value: "5,187 ft" },
+        { label: "To Ketchum", value: "20 min" },
+        { label: "Known for", value: "Open land, Silver Creek" },
+      ],
+      gallery: [
+        { src: "/photos/season-spring.jpg", alt: "Silver Creek in the south valley", caption: "Silver Creek" },
+        { src: "/photos/bellevue-main-street.jpg", alt: "Main Street, Bellevue", caption: "Main Street", credit: "Photo: Acroterion, CC BY-SA 4.0" },
+        { src: "/photos/wildflowers.jpg", alt: "Wildflowers below the Pioneer Mountains" },
+      ],
       intro: [
         "The valley opens up south of Hailey into ranch land, big skies, and Silver Creek, some of the best fly fishing in the West. Bellevue offers a slower pace and a little more room, with the mountains still twenty minutes away.",
       ],
@@ -670,7 +718,7 @@ export const site: SiteContent = {
         {
           heading: "Open country",
           text: "Acreage, horse property, and newer neighborhoods on the edge of town. Bellevue is where buyers go when they want a shop, a view in every direction, and a quieter price per square foot than the north valley.",
-          image: "/photos/season-spring.jpg",
+          image: "/photos/bellevue-main-street.jpg",
         },
         {
           heading: "Silver Creek and the south valley",
@@ -685,9 +733,19 @@ export const site: SiteContent = {
       type: "area",
       title: "Stanley",
       preTitle: "Homes and Land in Stanley, Idaho",
-      // TODO: replace with a Sawtooth / Redfish Lake photo (Envato workflow)
-      heroImage: "/photos/wildflowers.jpg",
+      heroImage: "/photos/stanley-redfish-aerial.jpg",
+      heroCredit: "Photo: HalcyonToast, CC BY-SA 4.0",
       area: { mlsCity: "Stanley", center: { lat: 44.2163, lng: -114.9328 }, zoom: 11 },
+      facts: [
+        { label: "Elevation", value: "6,253 ft" },
+        { label: "To Ketchum", value: "61 mi · 75 min" },
+        { label: "Known for", value: "Redfish Lake, the Sawtooths" },
+      ],
+      gallery: [
+        { src: "/photos/stanley-little-redfish.jpg", alt: "The Sawtooth Range reflected in Little Redfish Lake", caption: "Little Redfish Lake", credit: "Photo: Frank Kovalchek, CC BY 2.0" },
+        { src: "/photos/stanley-sawtooths-fence.jpg", alt: "Ranch fence below the Sawtooths outside Stanley", credit: "Photo: Frank Kovalchek, CC BY 2.0" },
+        { src: "/photos/stanley-sawtooth-valley.jpg", alt: "The Sawtooth Valley from Galena Summit", caption: "From Galena Summit", credit: "Photo: Acroterion, CC BY-SA 4.0" },
+      ],
       intro: [
         "An hour north of Ketchum over Galena Summit, Stanley sits at about 6,250 feet where the Salmon River begins and the Sawtooth Mountains rise straight out of the valley floor. Roughly a hundred people live here year-round, inside the Sawtooth National Recreation Area, with Redfish Lake a few minutes down the road.",
         "Property here is scarce by design. Most of the surrounding land is public, so what comes to market is a handful of cabins, homes, and parcels at any one time, and many of them change hands quietly. Mike watches the Stanley market closely and will tell you when something worth seeing comes up.",
@@ -696,12 +754,12 @@ export const site: SiteContent = {
         {
           heading: "Cabins, acreage, and views that do not quit",
           text: "Log homes on the river, lots in Lower Stanley and along Highway 21, and the occasional larger ranch parcel with the Sawtooths filling every window. Winters are famously cold and quiet; summers bring the lake, the trails, and most of the year's activity.",
-          image: "/photos/season-summer.jpg",
+          image: "/photos/stanley-sawtooths-fence.jpg",
         },
         {
           heading: "Redfish Lake and the Sawtooths",
           text: "Redfish Lake Lodge, the Salmon River float stretch, natural hot springs, and the trailheads into the Sawtooth Wilderness are the reasons people buy here. Stanley is also the gateway to the Frank Church, the largest contiguous wilderness in the lower 48.",
-          image: "/photos/wildflowers.jpg",
+          image: "/photos/stanley-redfish-canyon.jpg",
         },
       ],
       cta: { label: "Ask Mike About Stanley", href: "/connect" },
@@ -809,7 +867,7 @@ export const site: SiteContent = {
       title: "An Honest Number",
       cta: "Selling Your Home",
       href: "/sell",
-      image: "/photos/historic-home.jpg",
+      image: "/photos/office-exterior.jpg",
     },
     {
       preTitle: "The Market",
@@ -862,8 +920,7 @@ export const site: SiteContent = {
       title: "Stanley",
       description: "Sixty miles north over Galena Summit: the Sawtooths, Redfish Lake, and the headwaters of the Salmon River.",
       href: "/stanley",
-      // TODO: replace with a Sawtooth / Redfish Lake photo (Envato workflow)
-      image: "/photos/wildflowers.jpg",
+      image: "/photos/stanley-redfish-canyon.jpg",
       coords: { lat: 44.2163, lng: -114.9328 },
     },
   ],
