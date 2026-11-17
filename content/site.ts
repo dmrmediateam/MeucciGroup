@@ -14,6 +14,8 @@ export interface GalleryCard {
   title: string;
   /** Underlined line below the title (omit to hide) */
   cta?: string;
+  /** Map pin for service-area cards (the homepage and /the-valley maps) */
+  coords?: { lat: number; lng: number };
   /** Longer text revealed on hover (overlay-style cards, e.g. areas) */
   description?: string;
   href: string;
@@ -52,8 +54,8 @@ export interface TeamMember {
 export interface SubPage {
   /** URL segment, e.g. "buy" */
   slug: string;
-  /** "standard" = editorial; "search" = IDX search; "connect" = contact; "listings" = listing grid; "team" = roster */
-  type?: "standard" | "search" | "connect" | "listings" | "team";
+  /** "standard" = editorial; "search" = IDX search; "connect" = contact; "listings" = listing grid; "team" = roster; "area" = one town: map + live MLS listings */
+  type?: "standard" | "search" | "connect" | "listings" | "team" | "area";
   title: string;
   preTitle?: string;
   heroImage: string;
@@ -75,6 +77,13 @@ export interface SubPage {
   valuation?: boolean;
   /** Full-bleed background for the valuation wizard (defaults to heroImage) */
   valuationImage?: string;
+  /**
+   * Area pages (type: "area"): the MLS city name this page covers (must match
+   * the feed's own city name), the map center and starting zoom.
+   */
+  area?: { mlsCity: string; center: { lat: number; lng: number }; zoom?: number };
+  /** Add the service-area map (every `areas` pin + live listings) to a standard page */
+  showMap?: boolean;
 }
 
 export interface SiteContent {
@@ -332,8 +341,8 @@ export interface SiteContent {
    Voice: genuine, conversational, local. No flashy luxury language.
    -------------------------------------------------------------------------- */
 
-const PHONE = "(208) 928-7223";
-const EMAIL = "mike.meucci@evrealestate.com";
+const PHONE = "(208) 720-8449";
+const EMAIL = "meuccim3@gmail.com";
 const BROKERAGE = "Engel & Völkers Sun Valley";
 
 export const site: SiteContent = {
@@ -355,10 +364,10 @@ export const site: SiteContent = {
     siteUrl: "https://meucci-group.vercel.app",
     title: "Sun Valley Real Estate – Mike Meucci, Engel & Völkers Sun Valley",
     description:
-      "Homes in Sun Valley, Ketchum, Hailey and Bellevue, Idaho with Mike Meucci of Engel & Völkers Sun Valley. Local knowledge, a personal approach, and a call back the same day.",
+      "Homes in Sun Valley, Ketchum, Hailey, Bellevue and Stanley, Idaho with Mike Meucci of Engel & Völkers Sun Valley. Local knowledge, a personal approach, and a call back the same day.",
   },
   hero: {
-    preTitle: "Sun Valley · Ketchum · Hailey · Bellevue",
+    preTitle: "Sun Valley · Ketchum · Hailey · Bellevue · Stanley",
     title: "Life's Good Here.\nLet's Find Your Place.",
     lead:
       "Real estate in the Wood River Valley, handled the way a good neighbor would handle it: straight answers, local knowledge, and your call returned the same day.",
@@ -533,10 +542,11 @@ export const site: SiteContent = {
     {
       slug: "the-valley",
       title: "The Wood River Valley",
-      preTitle: "Four Towns. Four Seasons. One Place.",
+      preTitle: "Four Towns, the Sawtooths, Four Seasons.",
       heroImage: "/photos/wildflowers.jpg",
+      showMap: true,
       intro: [
-        "Twenty-some miles of valley along the Big Wood River, with Bald Mountain at the top and open ranch country at the bottom. Each town has its own feel. Mike can help you figure out which one is yours.",
+        "Twenty-some miles of valley along the Big Wood River, with Bald Mountain at the top and open ranch country at the bottom, and Stanley an hour north over Galena Summit. Each town has its own feel. Mike can help you figure out which one is yours.",
       ],
       sections: [
         {
@@ -560,12 +570,141 @@ export const site: SiteContent = {
           image: "/photos/season-spring.jpg",
         },
         {
+          heading: "Stanley and the Sawtooth Valley",
+          text: "An hour north of Ketchum over Galena Summit, Stanley sits where the Salmon River begins and the Sawtooths rise straight out of the valley floor. Redfish Lake, hot springs, and the wilderness boundary are minutes away. Homes and acreage come up rarely, and Mike keeps an eye on every one of them.",
+          image: "/photos/wildflowers.jpg",
+        },
+        {
           heading: "The life outside",
           text: "Skiing and Nordic trails in winter. Fly fishing, golf, hiking, and mountain biking the rest of the year. Most people who buy here are buying the days they will spend outside, and Mike will happily tell you where to spend them.",
           image: "/photos/baldy-skier.jpg",
         },
       ],
       cta: { label: "Talk with Mike About the Valley", href: "/connect" },
+    },
+    {
+      slug: "sun-valley",
+      type: "area",
+      title: "Sun Valley",
+      preTitle: "Homes in Sun Valley, Idaho",
+      heroImage: "/photos/baldy-torchlight.jpg",
+      area: { mlsCity: "Sun Valley", center: { lat: 43.6971, lng: -114.3517 }, zoom: 13 },
+      intro: [
+        "The original American ski resort and still the heart of winter here. Sun Valley is the Lodge and the Village, Elkhorn, and the quiet residential streets near the golf courses, the pool, and the Dollar Mountain lifts.",
+        "Condos and townhomes in the Village and Elkhorn sit a short walk from the ice rink and the trails. The single-family streets toward the Trail Creek side are some of the most settled addresses in the valley.",
+      ],
+      sections: [
+        {
+          heading: "The Village and Elkhorn",
+          text: "Resort living at walking pace: the symphony pavilion and the ice shows in summer, Dollar Mountain and the Nordic center in winter. Elkhorn adds its own golf course, pool, and a wide range of condos and homes, from lock-and-leave to full-time.",
+          image: "/photos/ev-balloons.jpg",
+        },
+        {
+          heading: "Who buys here",
+          text: "Many Sun Valley buyers are coming from out of state for a second home and end up staying longer each year. Mike will walk you through which buildings allow rentals, where the sun lands in January, and what the association covers.",
+          image: "/photos/baldy-skier.jpg",
+        },
+      ],
+      cta: { label: "Ask Mike About Sun Valley", href: "/connect" },
+    },
+    {
+      slug: "ketchum",
+      type: "area",
+      title: "Ketchum",
+      preTitle: "Homes in Ketchum, Idaho",
+      heroImage: "/photos/ketchum-evening.jpg",
+      area: { mlsCity: "Ketchum", center: { lat: 43.6807, lng: -114.3637 }, zoom: 13 },
+      intro: [
+        "The walkable town at the base of Bald Mountain, with restaurants, galleries, and shops a few steps from the Warm Springs and River Run lifts. Ketchum is where the valley goes out to dinner.",
+        "Neighborhoods range from downtown condos to homes tucked into the hillsides along Warm Springs Creek and the Big Wood River, with the Engel & Völkers shop right on the main street.",
+      ],
+      sections: [
+        {
+          heading: "Warm Springs and River Run",
+          text: "The two base areas of Baldy anchor Ketchum's most sought-after streets. Warm Springs is quieter and closer to the lifts; River Run and the Trail Creek side put you a short walk from downtown and the bike path.",
+          image: "/photos/baldy-skier.jpg",
+        },
+        {
+          heading: "Downtown and the hillsides",
+          text: "In-town condos and townhomes trade on walkability. Up the hillsides and north toward the Big Wood, lots open up and the views stretch down the valley. Mike knows which streets stay in the sun and which ones stay quiet in August.",
+          image: "/photos/ketchum-town-event.jpg",
+        },
+      ],
+      cta: { label: "Ask Mike About Ketchum", href: "/connect" },
+    },
+    {
+      slug: "hailey",
+      type: "area",
+      title: "Hailey",
+      preTitle: "Homes in Hailey, Idaho",
+      heroImage: "/photos/hailey-aerial.jpg",
+      area: { mlsCity: "Hailey", center: { lat: 43.5196, lng: -114.3153 }, zoom: 13 },
+      intro: [
+        "Twelve miles south of Ketchum, Hailey is where much of the valley actually lives: the schools, the airport, Main Street, and friendly year-round neighborhoods. It is where families settle in for good.",
+      ],
+      sections: [
+        {
+          heading: "Woodside and Old Hailey",
+          text: "Old Hailey keeps the historic grid and the walk to Main Street. Woodside, on the south end, is the valley's largest family neighborhood, with parks, the bike path, and a range of homes that trade more often than anywhere else in the valley.",
+          image: "/photos/historic-home.jpg",
+        },
+        {
+          heading: "The practical hub",
+          text: "Friedman Memorial Airport, the hospital campus just north of town, grocery stores, and the schools are all here. If you plan to live in the valley full-time, Hailey is usually where the conversation starts.",
+          image: "/photos/season-fall.jpg",
+        },
+      ],
+      cta: { label: "Ask Mike About Hailey", href: "/connect" },
+    },
+    {
+      slug: "bellevue",
+      type: "area",
+      title: "Bellevue",
+      preTitle: "Homes in Bellevue, Idaho",
+      heroImage: "/photos/season-spring.jpg",
+      area: { mlsCity: "Bellevue", center: { lat: 43.4635, lng: -114.2606 }, zoom: 13 },
+      intro: [
+        "The valley opens up south of Hailey into ranch land, big skies, and Silver Creek, some of the best fly fishing in the West. Bellevue offers a slower pace and a little more room, with the mountains still twenty minutes away.",
+      ],
+      sections: [
+        {
+          heading: "Open country",
+          text: "Acreage, horse property, and newer neighborhoods on the edge of town. Bellevue is where buyers go when they want a shop, a view in every direction, and a quieter price per square foot than the north valley.",
+          image: "/photos/season-spring.jpg",
+        },
+        {
+          heading: "Silver Creek and the south valley",
+          text: "The Silver Creek Preserve, the Picabo and Carey farm country, and the back road to Craters of the Moon are all out the door. Mike will tell you honestly what the commute to Ketchum feels like in February.",
+          image: "/photos/wildflowers.jpg",
+        },
+      ],
+      cta: { label: "Ask Mike About Bellevue", href: "/connect" },
+    },
+    {
+      slug: "stanley",
+      type: "area",
+      title: "Stanley",
+      preTitle: "Homes and Land in Stanley, Idaho",
+      // TODO: replace with a Sawtooth / Redfish Lake photo (Envato workflow)
+      heroImage: "/photos/wildflowers.jpg",
+      area: { mlsCity: "Stanley", center: { lat: 44.2163, lng: -114.9328 }, zoom: 11 },
+      intro: [
+        "An hour north of Ketchum over Galena Summit, Stanley sits at about 6,250 feet where the Salmon River begins and the Sawtooth Mountains rise straight out of the valley floor. Roughly a hundred people live here year-round, inside the Sawtooth National Recreation Area, with Redfish Lake a few minutes down the road.",
+        "Property here is scarce by design. Most of the surrounding land is public, so what comes to market is a handful of cabins, homes, and parcels at any one time, and many of them change hands quietly. Mike watches the Stanley market closely and will tell you when something worth seeing comes up.",
+      ],
+      sections: [
+        {
+          heading: "Cabins, acreage, and views that do not quit",
+          text: "Log homes on the river, lots in Lower Stanley and along Highway 21, and the occasional larger ranch parcel with the Sawtooths filling every window. Winters are famously cold and quiet; summers bring the lake, the trails, and most of the year's activity.",
+          image: "/photos/season-summer.jpg",
+        },
+        {
+          heading: "Redfish Lake and the Sawtooths",
+          text: "Redfish Lake Lodge, the Salmon River float stretch, natural hot springs, and the trailheads into the Sawtooth Wilderness are the reasons people buy here. Stanley is also the gateway to the Frank Church, the largest contiguous wilderness in the lower 48.",
+          image: "/photos/wildflowers.jpg",
+        },
+      ],
+      cta: { label: "Ask Mike About Stanley", href: "/connect" },
     },
     {
       slug: "about",
@@ -621,10 +760,11 @@ export const site: SiteContent = {
     designations: ["Real Estate Advisor"],
     designationsLong: "Real Estate Advisor · Engel & Völkers Sun Valley",
     communities: [
-      { label: "Sun Valley", href: "/the-valley" },
-      { label: "Ketchum", href: "/the-valley" },
-      { label: "Hailey", href: "/the-valley" },
-      { label: "Bellevue", href: "/the-valley" },
+      { label: "Sun Valley", href: "/sun-valley" },
+      { label: "Ketchum", href: "/ketchum" },
+      { label: "Hailey", href: "/hailey" },
+      { label: "Bellevue", href: "/bellevue" },
+      { label: "Stanley", href: "/stanley" },
     ],
     serviceArea: "Sun Valley, Idaho",
     buyersTitle: "Find your place in the Wood River Valley",
@@ -652,7 +792,7 @@ export const site: SiteContent = {
   },
   // Fallback only: with IDX connected the homepage shows live MLS counts instead.
   stats: [
-    { value: "4", label: "Towns, one valley: Sun Valley, Ketchum, Hailey, Bellevue" },
+    { value: "5", label: "Towns Mike covers: Sun Valley, Ketchum, Hailey, Bellevue, Stanley" },
     { value: "1977", label: "Engel & Völkers founded in Hamburg" },
     { value: "35+", label: "Countries in the Engel & Völkers network" },
   ],
@@ -693,26 +833,38 @@ export const site: SiteContent = {
     {
       title: "Sun Valley",
       description: "The resort, the Village, Elkhorn, and quiet streets a short walk from the lifts and the trails.",
-      href: "/the-valley",
+      href: "/sun-valley",
       image: "/photos/baldy-torchlight.jpg",
+      coords: { lat: 43.6971, lng: -114.3517 },
     },
     {
       title: "Ketchum",
       description: "The walkable town at the base of Baldy: restaurants, galleries, and homes from downtown to the hillsides.",
-      href: "/the-valley",
+      href: "/ketchum",
       image: "/photos/ketchum-evening.jpg",
+      coords: { lat: 43.6807, lng: -114.3637 },
     },
     {
       title: "Hailey",
       description: "Where the valley lives year-round. Schools, the airport, Main Street, and family neighborhoods.",
-      href: "/the-valley",
+      href: "/hailey",
       image: "/photos/hailey-aerial.jpg",
+      coords: { lat: 43.5196, lng: -114.3153 },
     },
     {
       title: "Bellevue",
       description: "Open country, big skies, and Silver Creek. A slower pace with the mountains still close.",
-      href: "/the-valley",
+      href: "/bellevue",
       image: "/photos/season-spring.jpg",
+      coords: { lat: 43.4635, lng: -114.2606 },
+    },
+    {
+      title: "Stanley",
+      description: "Sixty miles north over Galena Summit: the Sawtooths, Redfish Lake, and the headwaters of the Salmon River.",
+      href: "/stanley",
+      // TODO: replace with a Sawtooth / Redfish Lake photo (Envato workflow)
+      image: "/photos/wildflowers.jpg",
+      coords: { lat: 44.2163, lng: -114.9328 },
     },
   ],
   about: {

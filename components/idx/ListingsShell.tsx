@@ -23,7 +23,7 @@ export default function ListingsShell({
 }) {
   const page = content.pages.find((p) => p.slug === "listings");
   const image = page?.heroImage ?? content.hero.image;
-  const towns = content.areas.slice(0, 4);
+  const towns = content.areas;
   const first = content.footer.agentName.split(" ")[0];
 
   return (

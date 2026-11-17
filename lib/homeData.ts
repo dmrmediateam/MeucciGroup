@@ -80,7 +80,7 @@ export async function getFeaturedForHome(): Promise<Listing[] | null> {
   return [...(own ?? []), ...mapped].slice(0, 3);
 }
 
-export async function getLiveStats(townCount: number): Promise<HomeStat[] | null> {
+export async function getLiveStats(townNames: readonly string[]): Promise<HomeStat[] | null> {
   if (!idxConfigured()) return null;
   try {
     const pool = await searchListings({ status: "active", sort: "newest", pageSize: 250 });
@@ -88,10 +88,10 @@ export async function getLiveStats(townCount: number): Promise<HomeStat[] | null
     const since = Date.now() - 30 * 24 * 60 * 60 * 1000;
     const fresh = pool.listings.filter((l) => (l.listedAt ?? 0) >= since).length;
     const stats: HomeStat[] = [
-      { value: pool.totalCount.toLocaleString(), label: "Homes for sale across the valley right now" },
+      { value: pool.totalCount.toLocaleString(), label: "Homes for sale across the market right now" },
     ];
     if (fresh > 0) stats.push({ value: fresh.toLocaleString(), label: "New listings in the last 30 days" });
-    stats.push({ value: String(townCount), label: "Towns, one valley: Sun Valley, Ketchum, Hailey, Bellevue" });
+    stats.push({ value: String(townNames.length), label: `Towns Mike covers: ${townNames.join(", ")}` });
     return stats;
   } catch {
     return null;

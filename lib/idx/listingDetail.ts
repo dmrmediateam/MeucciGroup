@@ -50,8 +50,9 @@ export async function getSoldListingDetail(listingId: string): Promise<ListingDe
       revalidateSeconds: DETAIL_REVALIDATE_SECONDS,
       retries: 1,
     });
+    // Skip IDX's sample board (a999): the endpoint pads an empty account with it
     const record = Object.values(raw?.data ?? {}).find(
-      (item) => item && String(item.listingID) === String(listingId),
+      (item) => item && item.idxID !== 'a999' && String(item.listingID) === String(listingId),
     );
     if (!record || !record.listingID) return null;
     return normalizeListingDetail(record);

@@ -49,6 +49,8 @@ export interface RawIdxListing {
   // MLS office code. Present on both search results and detail records —
   // unlike listOfficeName, which only exists on the detail endpoint.
   listingOfficeID?: string;
+  latitude?: number | string;
+  longitude?: number | string;
   dateAdded?: string;
   listOfficeName?: string;
   listingOfficeName?: string;
@@ -107,6 +109,12 @@ function toOptionalNumber(value: string | number | undefined): number | undefine
   if (value === undefined || value === null || value === '') return undefined;
   const n = typeof value === 'number' ? value : Number(String(value).replace(/,/g, ''));
   return Number.isFinite(n) ? n : undefined;
+}
+
+/** A usable map coordinate: numeric and not the 0,0 the feed uses for "unknown". */
+function coordinate(value: string | number | undefined): number | undefined {
+  const n = toOptionalNumber(value);
+  return n !== undefined && n !== 0 ? n : undefined;
 }
 
 export function normalizeStatus(raw: string | undefined): ListingStatus {
@@ -192,6 +200,8 @@ export function normalizeListingSummary(raw: RawIdxListing): ListingSummary {
     featured: raw.featured === 'y',
     listingOfficeId: raw.listingOfficeID,
     listedAt: raw.dateAdded ? Date.parse(String(raw.dateAdded)) || undefined : undefined,
+    lat: coordinate(raw.latitude),
+    lng: coordinate(raw.longitude),
     detailUrl: detailUrlFor(raw),
   };
 }

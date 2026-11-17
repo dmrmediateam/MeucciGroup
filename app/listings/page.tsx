@@ -23,7 +23,7 @@ function toUrlSearchParams(params: Record<string, string | string[] | undefined>
   return searchParams;
 }
 
-const areaNames = site.areas.slice(0, 4).map((a) => a.title).join(", ");
+const areaNames = site.areas.map((a) => a.title).join(", ");
 
 export async function generateMetadata({ searchParams }: Params): Promise<Metadata> {
   const params = await searchParams;

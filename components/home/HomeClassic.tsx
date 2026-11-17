@@ -5,6 +5,8 @@ import SeasonsHero from "@/components/home/SeasonsHero";
 import Splash from "@/components/home/Splash";
 import type { GalleryCard, Listing, SiteContent } from "@/content/site";
 import type { HomeStat } from "@/lib/homeData";
+import type { MapArea } from "@/lib/mapData";
+import AreaMap from "@/components/map/AreaMap";
 
 /* ==========================================================================
    Home variant "classic": the original LP-derived design. Centered serif
@@ -16,13 +18,21 @@ export default function HomeClassic({
   content,
   liveListings,
   liveStats,
+  mapAreas,
 }: {
   content: SiteContent;
   /** Listings fetched from IDX Broker at request time; overrides config fallback */
   liveListings?: Listing[] | null;
   /** Market counts from the MLS; overrides the config stats */
   liveStats?: HomeStat[] | null;
+  /** Service-area pins with live counts; falls back to the config coordinates */
+  mapAreas?: MapArea[];
 }) {
+  const pins: MapArea[] = mapAreas && mapAreas.length > 0
+    ? mapAreas
+    : content.areas.flatMap((area) =>
+        area.coords ? [{ title: area.title, href: area.href, description: area.description, coords: area.coords }] : [],
+      );
   const featuredListings = liveListings ?? content.featured?.listings ?? [];
   const stats = liveStats && liveStats.length > 0 ? liveStats : content.stats;
   return (
@@ -111,6 +121,24 @@ export default function HomeClassic({
 
       {/* ============ AREAS GALLERY (overlay cards, hover reveal) ============ */}
       <GallerySection cards={content.areas} columns={2} variant="overlay" />
+
+      {/* ============ SERVICE-AREA MAP (one pin per town, live counts) ============ */}
+      {pins.length > 0 && (
+        <section className="solid-section">
+          <div className="map-band lp-vertical-paddings">
+            <div className="lp-container">
+              <div className="featured-band__head reveal">
+                <span className="featured-band__kicker">Find Your Place</span>
+                <h2 className="lp-h2">The Towns on the Map</h2>
+              </div>
+              <div className="reveal" data-delay="100">
+                <AreaMap center={pins[0].coords} zoom={10} areas={pins} fit="areas" />
+              </div>
+              <p className="map-band__note">Tap a town for a snapshot and a link to its page.</p>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ============ CTA (parallax) ============ */}
       <section

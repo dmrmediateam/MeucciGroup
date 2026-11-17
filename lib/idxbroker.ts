@@ -46,14 +46,49 @@ function firstImage(image: IdxFeaturedItem["image"]): string | undefined {
   return undefined;
 }
 
+/*
+ * IDX Broker's placeholder board. When an account has no featured listings
+ * linked, /clients/featured and /clients/soldpending answer with sample
+ * records from this MLS (Texarkana, Texas homes) instead of an empty set.
+ * They must never reach a client's homepage.
+ */
+const IDX_SAMPLE_MLS_ID = "a999";
+
+/** idxIDs this account is approved for (e.g. ["b675"]); empty when unknown */
+async function approvedMlsIds(accesskey: string): Promise<string[]> {
+  const configured = process.env.IDX_MLS_ID?.trim();
+  if (configured) return [configured];
+  try {
+    const res = await fetch("https://api.idxbroker.com/mls/approvedmls", {
+      headers: { accesskey, outputtype: "json" },
+      next: { revalidate: 86400 },
+    });
+    if (!res.ok) return [];
+    const data = (await res.json()) as Array<{ id?: string }> | undefined;
+    return (data ?? []).map((m) => String(m.id ?? "").trim()).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+/** True when a record belongs to this account's own MLS, not IDX's sample board */
+function fromOurMls(item: { idxID?: string }, approved: string[]): boolean {
+  const id = (item.idxID ?? "").trim().toLowerCase();
+  if (id === IDX_SAMPLE_MLS_ID) return false;
+  return approved.length === 0 || approved.some((a) => a.toLowerCase() === id);
+}
+
 export async function getFeaturedListings(): Promise<Listing[] | null> {
   const accesskey = process.env.IDX_API_KEY;
   if (!accesskey) return null;
   try {
-    const res = await fetch("https://api.idxbroker.com/clients/featured", {
-      headers: { accesskey, outputtype: "json" },
-      next: { revalidate: 3600 },
-    });
+    const [res, approved] = await Promise.all([
+      fetch("https://api.idxbroker.com/clients/featured", {
+        headers: { accesskey, outputtype: "json" },
+        next: { revalidate: 3600 },
+      }),
+      approvedMlsIds(accesskey),
+    ]);
     if (!res.ok) return null;
     const data = await res.json();
     // The API wraps results: { total, first, last, next, previous, data: {...} }
@@ -64,7 +99,7 @@ export async function getFeaturedListings(): Promise<Listing[] | null> {
       ? payload
       : Object.values((payload ?? {}) as Record<string, IdxFeaturedItem>);
     const listings = items
-      .filter((item) => item && typeof item === "object" && item.address)
+      .filter((item) => item && typeof item === "object" && item.address && fromOurMls(item, approved))
       .map((item): Listing => {
         const image = firstImage(item.image);
         const cityState = [item.cityName, item.state].filter(Boolean).join(", ");

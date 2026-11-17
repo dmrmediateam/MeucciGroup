@@ -57,6 +57,9 @@ export interface ListingSummary {
   virtualTourUrl?: string;
   /** Feed's dateAdded as epoch ms, for the "newest" sort */
   listedAt?: number;
+  /** Map coordinates from the feed (absent when the MLS withholds them) */
+  lat?: number;
+  lng?: number;
   detailUrl: string;
 }
 
